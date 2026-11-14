@@ -412,10 +412,10 @@ st.sidebar.divider()
 page = st.sidebar.radio(
     "NAVIGATION",
     [
-        ":material/dashboard: Dashboard",
-        ":material/account_balance_wallet: Visualization 1",
-        ":material/scatter_plot: Visualization 2",
-        ":material/show_chart: Visualization 3"
+        ":material/dashboard: Dashboard Overview",
+        ":material/account_balance_wallet: Objective 1 - Income",
+        ":material/scatter_plot: Objective 2 - Scatter Plot",
+        ":material/show_chart: Objective 3 - Population"
     ]
 )
 
