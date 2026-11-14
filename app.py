@@ -581,8 +581,7 @@ elif "Objective 1" in page:
 
     st.markdown(
         '<div class="section-title">'
-        ':material/account_balance_wallet: '
-        'OBJECTIVE 1: HOUSEHOLD INCOME'
+        'OBJECTIVE 1:' 
         '</div>',
         unsafe_allow_html=True
     )
@@ -777,8 +776,8 @@ elif "Objective 2" in page:
 
     st.markdown(
         '<div class="section-title">'
-        ':material/scatter_plot: '
-        'OBJECTIVE 2: POPULATION VS INCOME'
+
+        'OBJECTIVE 2:'
         '</div>',
         unsafe_allow_html=True
     )
@@ -999,8 +998,7 @@ elif "Objective 3" in page:
 
     st.markdown(
         '<div class="section-title">'
-        ':material/show_chart: '
-        'OBJECTIVE 3: POPULATION TRENDS'
+        'OBJECTIVE 3:'
         '</div>',
         unsafe_allow_html=True
     )
