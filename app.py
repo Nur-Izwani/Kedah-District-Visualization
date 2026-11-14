@@ -1,7 +1,7 @@
 
 # ============================================================
 # KEDAH DATA INSIGHTS
-# SCIENTIFIC VISUALIZATION DASHBOARD
+# JIE42403 - SCIENTIFIC VISUALIZATION
 # Study Area: Kedah, Malaysia
 # ============================================================
 
@@ -9,7 +9,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
 
 # ============================================================
 # 1. PAGE CONFIGURATION
@@ -23,19 +22,19 @@ st.set_page_config(
 )
 
 # ============================================================
-# 2. CUSTOM CSS
+# 2. CUSTOM DESIGN
 # ============================================================
 
 st.markdown("""
 <style>
 
 .stApp {
-    background-color: #F3F7FC;
+    background-color: #F3F6FC;
 }
 
 [data-testid="stSidebar"] {
     background: linear-gradient(
-        180deg, #123B63, #087E8B
+        180deg, #123B63 0%, #087E8B 100%
     );
 }
 
@@ -49,7 +48,6 @@ st.markdown("""
     );
     padding: 30px;
     border-radius: 18px;
-    color: white;
     margin-bottom: 25px;
 }
 
@@ -64,32 +62,61 @@ st.markdown("""
     font-size: 15px;
 }
 
-.section-header {
+.section-title {
     color: #123B63;
     font-size: 25px;
     font-weight: 750;
     margin-top: 15px;
 }
 
-.info-card {
+.summary-card {
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid #DCE6F2;
+    box-shadow: 0 3px 12px rgba(20,50,80,0.06);
+    min-height: 115px;
+}
+
+.summary-label {
+    color: #64748B;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.summary-value {
+    color: #123B63;
+    font-size: 25px;
+    font-weight: 800;
+    margin-top: 8px;
+}
+
+.summary-detail {
+    color: #64748B;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.objective-card {
     background: white;
     padding: 20px;
     border-radius: 14px;
     border-left: 5px solid #13A8A8;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(20,50,80,0.05);
+}
+
+div[data-testid="stPlotlyChart"] {
+    background: white;
+    border-radius: 14px;
+    padding: 10px;
 }
 
 div[data-testid="stMetric"] {
     background: white;
     border: 1px solid #DCE6F2;
-    padding: 17px;
-    border-radius: 13px;
-}
-
-div[data-testid="stPlotlyChart"] {
-    background: white;
-    padding: 12px;
-    border-radius: 14px;
+    padding: 15px;
+    border-radius: 12px;
 }
 
 </style>
@@ -118,19 +145,21 @@ try:
 
     df_income, df_population = load_data()
 
-except Exception as e:
+except Exception as error:
 
-    st.error(f"Dataset loading error: {e}")
+    st.error(f"Dataset loading error: {error}")
     st.stop()
 
 
 # ============================================================
-# 4. DATA CLEANING
+# 4. DATA PREPROCESSING
 # ============================================================
 
+# Clean column names
 df_income.columns = df_income.columns.str.strip()
 df_population.columns = df_population.columns.str.strip()
 
+# Convert date
 df_income["date"] = pd.to_datetime(
     df_income["date"], errors="coerce"
 )
@@ -150,7 +179,7 @@ df_population = df_population[
     == "kedah"
 ].copy()
 
-# Filter overall population demographics
+# Filter demographic variables
 def filter_overall(data):
 
     for col, value in {
@@ -171,7 +200,7 @@ def filter_overall(data):
 df_income = filter_overall(df_income)
 df_population = filter_overall(df_population)
 
-# Convert numeric columns
+# Convert numerical values
 for col in [
     "income_mean",
     "income_median",
@@ -190,11 +219,12 @@ df_population["population"] = pd.to_numeric(
     df_population["population"], errors="coerce"
 )
 
-# Filter years
+# Income: 2024 only
 df_income = df_income[
     df_income["date"].dt.year == 2024
 ].copy()
 
+# Population: 2020-2024
 df_population["year"] = (
     df_population["date"].dt.year
 )
@@ -205,7 +235,7 @@ df_population = df_population[
 
 
 # ============================================================
-# 5. GRAPH 1 DATA PREPARATION
+# 5. GRAPH 1 DATA
 # ============================================================
 
 df_income_graph = df_income.dropna(
@@ -216,73 +246,68 @@ df_income_graph = (
     df_income_graph.groupby(
         "district", as_index=False
     )["income_mean"].mean()
-)
-
-df_income_graph = df_income_graph.sort_values(
-    "income_mean", ascending=True
+    .sort_values("income_mean", ascending=True)
 )
 
 
 # ============================================================
-# 6. GRAPH 2 DATA PREPARATION
+# 6. GRAPH 2 DATA
 # ============================================================
 
-# Population data 2024
-df_pop_2024 = df_population[
-    df_population["year"] == 2024
+# Prepare income data
+df_income_graph2 = df_income.copy()
+
+# Prepare population data
+df_population_graph2 = df_population.copy()
+
+# Filter population for 2024
+df_population_graph2 = df_population_graph2[
+    df_population_graph2["date"].dt.year == 2024
 ].copy()
 
-# Income data
-df_income_2024 = df_income[
+# Select columns
+df_income_graph2 = df_income_graph2[
     ["state", "district", "date", "income_mean"]
 ].copy()
 
-# Population data
-df_pop_scatter = df_pop_2024[
+df_population_graph2 = df_population_graph2[
     ["state", "district", "date", "population"]
 ].copy()
 
-# Convert numerical values
-df_income_2024["income_mean"] = pd.to_numeric(
-    df_income_2024["income_mean"],
-    errors="coerce"
-)
-
-df_pop_scatter["population"] = pd.to_numeric(
-    df_pop_scatter["population"],
-    errors="coerce"
-)
-
 # Remove missing values
-df_income_2024 = df_income_2024.dropna(
-    subset=["district", "income_mean"]
+df_income_graph2 = df_income_graph2.dropna(
+    subset=["state", "district", "date", "income_mean"]
 )
 
-df_pop_scatter = df_pop_scatter.dropna(
-    subset=["district", "population"]
+df_population_graph2 = df_population_graph2.dropna(
+    subset=["state", "district", "date", "population"]
 )
 
-# Group duplicate records
-df_income_2024 = df_income_2024.groupby(
-    ["state", "district", "date"],
-    as_index=False
-)["income_mean"].mean()
+# Group duplicate district records
+df_income_graph2 = (
+    df_income_graph2.groupby(
+        ["state", "district", "date"],
+        as_index=False
+    )["income_mean"].mean()
+)
 
-df_pop_scatter = df_pop_scatter.groupby(
-    ["state", "district", "date"],
-    as_index=False
-)["population"].mean()
+df_population_graph2 = (
+    df_population_graph2.groupby(
+        ["state", "district", "date"],
+        as_index=False
+    )["population"].mean()
+)
 
 # Merge datasets
 df_scatter = pd.merge(
-    df_pop_scatter,
-    df_income_2024,
+    df_population_graph2,
+    df_income_graph2,
     on=["state", "district", "date"],
     how="inner",
     validate="one_to_one"
 )
 
-# District label
+# Create district labels
 df_scatter["district_label"] = (
     df_scatter["district"].astype(str)
     + " ("
@@ -296,12 +321,14 @@ df_scatter = df_scatter.sort_values(
 
 
 # ============================================================
-# 7. GRAPH 3 DATA PREPARATION
+# 7. GRAPH 3 DATA
 # ============================================================
 
-df_population_graph = df_population.dropna(
+df_population_graph = df_population.copy()
+
+df_population_graph = df_population_graph.dropna(
     subset=["district", "population", "year"]
-).copy()
+)
 
 df_population_graph = (
     df_population_graph.groupby(
@@ -337,23 +364,48 @@ district_colors = [
     "#7CB342"
 ]
 
-chart_theme = dict(
-    template="plotly_white",
-    paper_bgcolor="white",
-    plot_bgcolor="white",
-    font=dict(
-        family="Arial",
-        size=12,
-        color="#26374A"
+chart_theme = {
+    "template": "plotly_white",
+    "paper_bgcolor": "white",
+    "plot_bgcolor": "white",
+    "font": {
+        "family": "Arial",
+        "size": 12,
+        "color": "#26374A"
+    }
+}
+
+
+# ============================================================
+# 9. SUMMARY CARD FUNCTION
+# ============================================================
+
+def summary_card(label, value, detail, color):
+
+    st.markdown(
+        f"""
+        <div class="summary-card"
+             style="border-top:4px solid {color};">
+
+            <div class="summary-label">{label}</div>
+
+            <div class="summary-value">{value}</div>
+
+            <div class="summary-detail">{detail}</div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
+
+
+# ============================================================
+# 10. SIDEBAR NAVIGATION
+# ============================================================
+
+st.sidebar.markdown(
+    "# KEDAH DATA INSIGHTS"
 )
-
-
-# ============================================================
-# 9. SIDEBAR
-# ============================================================
-
-st.sidebar.markdown("# 📊 KEDAH DATA INSIGHTS")
 
 st.sidebar.caption(
     "Scientific Visualization Dashboard"
@@ -362,44 +414,42 @@ st.sidebar.caption(
 st.sidebar.divider()
 
 page = st.sidebar.radio(
-    "SELECT PAGE",
+    "NAVIGATION",
     [
-        "🏠 Home",
-        "📊 Objective 1 - Income",
-        "🔵 Objective 2 - Scatter Plot",
-        "📈 Objective 3 - Population"
+        ":material/dashboard: Dashboard Overview",
+        ":material/account_balance_wallet: Objective 1 - Income",
+        ":material/scatter_plot: Objective 2 - Scatter Plot",
+        ":material/show_chart: Objective 3 - Population"
     ]
 )
 
 st.sidebar.divider()
 
-st.sidebar.markdown(
-    """
-    **STUDY INFORMATION**
+st.sidebar.markdown("### STUDY INFORMATION")
 
-    📍 Kedah, Malaysia
+st.sidebar.markdown("""
+**Study Area:** Kedah, Malaysia
 
-    💰 Income: 2024
+**Income:** 2024
 
-    👥 Population: 2020–2024
+**Population:** 2020–2024
 
-    📚 District-level analysis
-    """
-)
+**Analysis:** District Level
+""")
 
 st.sidebar.caption(
-    "Scientific Visualization Project"
+    "JIE42403 | Scientific Visualization"
 )
 
 
 # ============================================================
-# 10. MAIN HEADER
+# 11. MAIN HEADER
 # ============================================================
 
 st.markdown("""
 <div class="main-header">
 
-<h1>📊 KEDAH DATA INSIGHTS</h1>
+<h1>KEDAH DATA INSIGHTS</h1>
 
 <p>
 Household Income, Population and District Analysis
@@ -414,80 +464,96 @@ SCIENTIFIC VISUALIZATION | KEDAH, MALAYSIA
 
 
 # ============================================================
-# PAGE 1: HOME
+# PAGE 1: DASHBOARD OVERVIEW
 # ============================================================
 
-if page == "🏠 Home":
+if "Dashboard Overview" in page:
 
     st.markdown(
-        '<div class="section-header">Dashboard Overview</div>',
+        '<div class="section-title">'
+        ':material/dashboard: Dashboard Overview'
+        '</div>',
         unsafe_allow_html=True
     )
 
     st.write(
-        "Explore household income and population patterns "
-        "across districts in Kedah, Malaysia."
+        "This dashboard explores household income, "
+        "population and district-level patterns in Kedah."
     )
 
-    c1, c2, c3 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
 
-    c1.metric(
-        "📍 Districts",
-        df_income_graph["district"].nunique()
+    col1.metric(
+        "Study Area",
+        "Kedah"
     )
 
-    c2.metric(
-        "💰 Income Year",
+    col2.metric(
+        "Income Reference",
         "2024"
     )
 
-    c3.metric(
-        "👥 Study Period",
+    col3.metric(
+        "Population Period",
         "2020–2024"
     )
 
     st.divider()
 
-    st.subheader("🎯 Research Objectives")
+    st.subheader("Research Objectives")
 
-    col1, col2, col3 = st.columns(3)
+    c1, c2, c3 = st.columns(3)
 
-    with col1:
+    with c1:
 
         st.markdown("""
-        <div class="info-card">
-        <h3 style="color:#1565C0;">01 💰 Income</h3>
-        <p>Analyze differences in mean household income
-        across districts in Kedah in 2024.</p>
+        <div class="objective-card">
+        <h3 style="color:#1565C0;">
+        Household Income
+        </h3>
+        <p>
+        To examine differences in mean household income
+        across districts in Kedah in 2024.
+        </p>
         <b>Horizontal Bar Chart</b>
         </div>
         """, unsafe_allow_html=True)
 
-    with col2:
+    with c2:
 
         st.markdown("""
-        <div class="info-card">
-        <h3 style="color:#E53935;">02 🔵 Relationship</h3>
-        <p>Examine the relationship between district
-        population and mean household income in 2024.</p>
+        <div class="objective-card">
+        <h3 style="color:#E53935;">
+        Population and Income
+        </h3>
+        <p>
+        To examine the relationship between district
+        population and mean household income in Kedah in 2024.
+        </p>
         <b>Scatter Plot</b>
         </div>
         """, unsafe_allow_html=True)
 
-    with col3:
+    with c3:
 
         st.markdown("""
-        <div class="info-card">
-        <h3 style="color:#00897B;">03 📈 Population</h3>
-        <p>Analyze population trends across districts
-        from 2020 to 2024.</p>
+        <div class="objective-card">
+        <h3 style="color:#00897B;">
+        Population Trends
+        </h3>
+        <p>
+        To analyze population trends across districts
+        in Kedah from 2020 to 2024.
+        </p>
         <b>Line Chart</b>
         </div>
         """, unsafe_allow_html=True)
 
     st.divider()
 
-    st.subheader("📂 Dataset Preview")
+    st.subheader(
+        ":material/database: Dataset Preview"
+    )
 
     tab1, tab2 = st.tabs([
         "Income Dataset",
@@ -498,32 +564,45 @@ if page == "🏠 Home":
 
         st.dataframe(
             df_income.head(10),
-            use_container_width=True
+            use_container_width=True,
+            hide_index=True
         )
 
     with tab2:
 
         st.dataframe(
             df_population.head(10),
-            use_container_width=True
+            use_container_width=True,
+            hide_index=True
         )
 
 
 # ============================================================
-# PAGE 2: GRAPH 1 - HORIZONTAL BAR CHART
+# PAGE 2: OBJECTIVE 1
 # ============================================================
 
-elif page == "📊 Objective 1 - Income":
+elif "Objective 1" in page:
 
     st.markdown(
-        '<div class="section-header">'
-        '💰 OBJECTIVE 1: HOUSEHOLD INCOME'
+        '<div class="section-title">'
+        ':material/account_balance_wallet: '
+        'OBJECTIVE 1: HOUSEHOLD INCOME'
         '</div>',
         unsafe_allow_html=True
     )
 
-    st.write(
-        "Mean Household Income by District in Kedah (2024)"
+    # OBJECTIVE STATEMENT
+    st.markdown(
+        """
+        <div class="objective-card">
+        <b>Objective Statement</b>
+        <p>
+        To examine the differences in mean household income
+        across districts in Kedah in 2024.
+        </p>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     if not df_income_graph.empty:
@@ -531,28 +610,58 @@ elif page == "📊 Objective 1 - Income":
         highest = df_income_graph.iloc[-1]
         lowest = df_income_graph.iloc[0]
 
-        col1, col2, col3 = st.columns(3)
+        average = df_income_graph["income_mean"].mean()
 
-        col1.metric(
-            "Highest Income",
-            f"RM {highest['income_mean']:,.0f}",
-            highest["district"]
+        income_gap = (
+            highest["income_mean"] - lowest["income_mean"]
         )
 
-        col2.metric(
-            "Lowest Income",
-            f"RM {lowest['income_mean']:,.0f}",
-            lowest["district"]
+        # SUMMARY BOX
+        st.subheader(
+            ":material/insights: Summary Box"
         )
 
-        col3.metric(
-            "Income Gap",
-            f"RM {highest['income_mean'] - lowest['income_mean']:,.0f}"
-        )
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            summary_card(
+                "Highest Income",
+                f"RM {highest['income_mean']:,.0f}",
+                highest["district"],
+                "#1565C0"
+            )
+
+        with col2:
+            summary_card(
+                "Lowest Income",
+                f"RM {lowest['income_mean']:,.0f}",
+                lowest["district"],
+                "#E53935"
+            )
+
+        with col3:
+            summary_card(
+                "Average Income",
+                f"RM {average:,.0f}",
+                "Across districts",
+                "#00897B"
+            )
+
+        with col4:
+            summary_card(
+                "Income Gap",
+                f"RM {income_gap:,.0f}",
+                "Highest minus lowest",
+                "#F57C00"
+            )
 
         st.divider()
 
-        # ACTUAL GRAPH 1
+        # ORIGINAL GRAPH 1
+        st.subheader(
+            ":material/bar_chart: Visualization 1"
+        )
+
         fig1 = px.bar(
             df_income_graph,
             x="income_mean",
@@ -560,8 +669,12 @@ elif page == "📊 Objective 1 - Income":
             orientation="h",
             text="income_mean",
             color="district",
-            color_discrete_sequence=district_colors,
-            title="Mean Household Income by District in Kedah (2024)",
+            color_discrete_sequence=[
+                "#1565C0", "#1976D2", "#1E88E5",
+                "#039BE5", "#00ACC1", "#00897B",
+                "#43A047", "#7CB342", "#F9A825",
+                "#EF6C00", "#D84315", "#8E24AA"
+            ],
             labels={
                 "income_mean": "Mean Household Income (RM)",
                 "district": "District"
@@ -590,102 +703,100 @@ elif page == "📊 Objective 1 - Income":
             title=dict(
                 text="<b>Mean Household Income by District in Kedah (2024)</b>",
                 x=0.5,
-                font=dict(size=19, color="#123B63")
+                xanchor="center",
+                font=dict(size=20, color="#123B63")
             ),
             showlegend=False,
-            height=600,
-            margin=dict(
-                l=100,
-                r=120,
-                t=100,
-                b=80
-            ),
             xaxis=dict(
-                title="<b>Mean Household Income (RM)</b>",
-                tickformat=",.0f",
+                title="Mean Household Income (RM)",
                 showline=True,
                 linewidth=2,
                 linecolor="black",
-                gridcolor="#D9E2F0"
+                tickformat=",.0f",
+                showgrid=True,
+                gridcolor="#D9E2F0",
+                zeroline=False
             ),
             yaxis=dict(
-                title="<b>District</b>",
+                title="District",
                 showline=True,
                 linewidth=2,
                 linecolor="black",
                 tickfont=dict(size=12, color="black")
+            ),
+            height=600,
+            margin=dict(
+                l=100, r=120, t=100, b=80
             )
         )
 
-        # DISPLAY GRAPH
         st.plotly_chart(
             fig1,
-            use_container_width=True,
-            key="graph1"
+            use_container_width=True
         )
 
-        st.subheader("🔍 Key Findings")
-
-        st.success(
-            f"Highest: {highest['district']} "
-            f"(RM {highest['income_mean']:,.2f})"
+        # INTERPRETATION
+        st.subheader(
+            ":material/analytics: Interpretation and Discussion"
         )
 
-        st.info(
-            f"Lowest: {lowest['district']} "
-            f"(RM {lowest['income_mean']:,.2f})"
-        )
+        st.markdown(f"""
+        The horizontal bar chart shows differences in mean
+        household income across districts in Kedah in 2024.
+        {highest['district']} recorded the highest mean
+        household income at RM {highest['income_mean']:,.2f},
+        while {lowest['district']} recorded the lowest at
+        RM {lowest['income_mean']:,.2f}.
 
-        st.subheader("📝 Interpretation and Discussion")
-
-        st.markdown("""
-        The horizontal bar chart illustrates the differences
-        in mean household income across districts in Kedah
-        in 2024. The length of each bar represents the
-        mean household income recorded in each district.
-        The arrangement from the lowest to the highest
-        value makes it easier to compare income levels
-        across the districts.
-
-        The differences may reflect variations in local
-        economic activities, employment opportunities and
-        household characteristics. These findings provide
-        an overview of income distribution at the district
-        level. However, mean income alone does not represent
-        the complete economic condition of households.
+        The income gap of RM {income_gap:,.2f} indicates
+        variation in household income between the highest
+        and lowest districts. These differences may reflect
+        variations in employment opportunities, economic
+        activities and local development. However, mean
+        household income alone cannot explain all aspects
+        of household economic well-being.
         """)
 
-        with st.expander("View Detailed Data"):
+        with st.expander("View Detailed Income Data"):
 
             st.dataframe(
                 df_income_graph.sort_values(
                     "income_mean",
                     ascending=False
                 ),
-                use_container_width=True
+                use_container_width=True,
+                hide_index=True
             )
 
     else:
 
-        st.warning("No income data available.")
+        st.warning("No valid income records found.")
 
 
 # ============================================================
-# PAGE 3: GRAPH 2 - SCATTER PLOT
+# PAGE 3: OBJECTIVE 2
 # ============================================================
 
-elif page == "🔵 Objective 2 - Scatter Plot":
+elif "Objective 2" in page:
 
     st.markdown(
-        '<div class="section-header">'
-        '🔵 OBJECTIVE 2: POPULATION VS INCOME'
+        '<div class="section-title">'
+        ':material/scatter_plot: '
+        'OBJECTIVE 2: POPULATION VS INCOME'
         '</div>',
         unsafe_allow_html=True
     )
 
-    st.write(
-        "District Population vs Mean Household Income in Kedah (2024)"
-    )
+    # OBJECTIVE STATEMENT
+    st.markdown("""
+    <div class="objective-card">
+    <b>Objective Statement</b>
+    <p>
+    To examine the relationship between district population
+    and mean household income in Kedah in 2024.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     if len(df_scatter) >= 2:
 
@@ -693,32 +804,74 @@ elif page == "🔵 Objective 2 - Scatter Plot":
             ["population", "income_mean"]
         ].corr().iloc[0, 1]
 
-        c1, c2, c3 = st.columns(3)
+        highest_population = df_scatter.loc[
+            df_scatter["population"].idxmax()
+        ]
 
-        c1.metric(
-            "Districts Analyzed",
-            len(df_scatter)
+        highest_income = df_scatter.loc[
+            df_scatter["income_mean"].idxmax()
+        ]
+
+        if abs(correlation) < 0.3:
+            strength = "Weak"
+        elif abs(correlation) < 0.7:
+            strength = "Moderate"
+        else:
+            strength = "Strong"
+
+        if correlation > 0:
+            direction = "Positive"
+        elif correlation < 0:
+            direction = "Negative"
+        else:
+            direction = "No linear relationship"
+
+        # SUMMARY BOX
+        st.subheader(
+            ":material/insights: Summary Box"
         )
 
-        c2.metric(
-            "Pearson Correlation",
-            f"{correlation:.3f}"
-        )
+        col1, col2, col3, col4 = st.columns(4)
 
-        direction = (
-            "Positive" if correlation > 0
-            else "Negative" if correlation < 0
-            else "No linear relationship"
-        )
+        with col1:
+            summary_card(
+                "Pearson Correlation",
+                f"{correlation:.3f}",
+                f"{strength} relationship",
+                "#1565C0"
+            )
 
-        c3.metric(
-            "Relationship",
-            direction
-        )
+        with col2:
+            summary_card(
+                "Districts Analyzed",
+                str(len(df_scatter)),
+                "Matched observations",
+                "#00897B"
+            )
+
+        with col3:
+            summary_card(
+                "Highest Population",
+                f"{highest_population['population']:,.0f}",
+                highest_population["district"],
+                "#E53935"
+            )
+
+        with col4:
+            summary_card(
+                "Highest Income",
+                f"RM {highest_income['income_mean']:,.0f}",
+                highest_income["district"],
+                "#F57C00"
+            )
 
         st.divider()
 
-        # ACTUAL GRAPH 2
+        # ORIGINAL GRAPH 2
+        st.subheader(
+            ":material/scatter_plot: Visualization 2"
+        )
+
         fig2 = px.scatter(
             df_scatter,
             x="population",
@@ -743,7 +896,7 @@ elif page == "🔵 Objective 2 - Scatter Plot":
 
         fig2.update_traces(
             marker=dict(
-                size=12,
+                size=11,
                 opacity=0.9,
                 line=dict(
                     width=1.2,
@@ -757,119 +910,115 @@ elif page == "🔵 Objective 2 - Scatter Plot":
             title=dict(
                 text="<b>District Population vs Mean Household Income in Kedah (2024)</b>",
                 x=0.5,
-                font=dict(size=18, color="#123B63")
-            ),
-            height=650,
-            width=1100,
-            margin=dict(
-                l=85,
-                r=190,
-                t=90,
-                b=75
+                xanchor="center",
+                font=dict(size=17, color="#123B63")
             ),
             xaxis=dict(
                 title="<b>Population (Thousands)</b>",
-                tickformat=",.0f",
                 showline=True,
                 linewidth=2,
                 linecolor="black",
                 mirror=True,
+                tickformat=",.0f",
+                showgrid=True,
                 gridcolor="lightgrey"
             ),
             yaxis=dict(
                 title="<b>Mean Household Income (RM)</b>",
-                tickformat=",.0f",
                 showline=True,
                 linewidth=2,
                 linecolor="black",
                 mirror=True,
+                tickformat=",.0f",
+                showgrid=True,
                 gridcolor="lightgrey"
             ),
             legend=dict(
-                title="<b>District</b>",
+                title=dict(text="<b>District</b>"),
                 orientation="v",
-                x=1.02,
                 y=1,
+                x=1.02,
                 bgcolor="white",
                 bordercolor="black",
                 borderwidth=1,
                 font=dict(size=10)
             ),
+            height=620,
+            margin=dict(
+                l=85, r=190, t=85, b=75
+            ),
             hovermode="closest"
         )
 
-        # DISPLAY GRAPH
         st.plotly_chart(
             fig2,
-            use_container_width=True,
-            key="graph2"
+            use_container_width=True
         )
 
-        st.subheader("🔍 Correlation Analysis")
-
-        if abs(correlation) < 0.3:
-            strength = "Weak"
-        elif abs(correlation) < 0.7:
-            strength = "Moderate"
-        else:
-            strength = "Strong"
-
-        st.info(
-            f"Pearson correlation = {correlation:.3f}. "
-            f"This indicates a {strength.lower()} "
-            f"{direction.lower()} linear relationship."
+        # INTERPRETATION
+        st.subheader(
+            ":material/analytics: Interpretation and Discussion"
         )
 
-        st.subheader("📝 Interpretation and Discussion")
-
-        st.markdown("""
+        st.markdown(f"""
         The scatter plot illustrates the relationship between
         district population and mean household income in
         Kedah in 2024. Each point represents one district.
-        The horizontal axis shows population, while the
-        vertical axis shows mean household income. The
-        distribution of points helps identify patterns
-        between the two variables.
+        The Pearson correlation coefficient is
+        {correlation:.3f}, indicating a {strength.lower()}
+        {direction.lower()} linear relationship between
+        the two variables.
 
-        The Pearson correlation coefficient indicates
-        the direction and strength of the linear relationship.
-        A positive correlation means that both variables
-        tend to increase together, while a negative
-        correlation indicates an opposite pattern.
-        However, correlation does not establish causation.
+        A {direction.lower()} relationship suggests that
+        population size and mean household income tend to
+        move in the same or opposite direction. The
+        distribution of individual points also helps
+        identify districts that differ from the general
+        pattern. However, correlation does not establish
+        causation, and other socioeconomic factors may
+        influence household income.
         """)
 
         with st.expander("View Detailed Scatter Data"):
 
             st.dataframe(
                 df_scatter,
-                use_container_width=True
+                use_container_width=True,
+                hide_index=True
             )
 
     else:
 
         st.warning(
-            "Not enough matched district observations "
-            "to create the scatter plot."
+            "Not enough matched district records "
+            "to calculate the relationship."
         )
 
 
 # ============================================================
-# PAGE 4: GRAPH 3 - LINE CHART
+# PAGE 4: OBJECTIVE 3
 # ============================================================
 
-elif page == "📈 Objective 3 - Population":
+elif "Objective 3" in page:
 
     st.markdown(
-        '<div class="section-header">'
-        '📈 OBJECTIVE 3: POPULATION TRENDS'
+        '<div class="section-title">'
+        ':material/show_chart: '
+        'OBJECTIVE 3: POPULATION TRENDS'
         '</div>',
         unsafe_allow_html=True
     )
 
-    st.write(
-        "Population Trends by District in Kedah (2020–2024)"
-    )
+    # OBJECTIVE STATEMENT
+    st.markdown("""
+    <div class="objective-card">
+    <b>Objective Statement</b>
+    <p>
+    To analyze population trends across districts
+    in Kedah from 2020 to 2024.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     if not df_population_graph.empty:
 
@@ -889,37 +1038,91 @@ elif page == "📈 Objective 3 - Population":
             df_population_graph["year"] == last_year
         ]["population"].sum()
 
-        difference = last_total - first_total
+        population_change = last_total - first_total
 
-        c1, c2, c3 = st.columns(3)
-
-        c1.metric(
-            "Starting Year",
-            first_year
+        percentage_change = (
+            population_change / first_total * 100
+            if first_total != 0 else 0
         )
 
-        c2.metric(
-            "Latest Year",
-            last_year
+        highest_latest = df_population_graph[
+            df_population_graph["year"] == last_year
+        ].sort_values(
+            "population", ascending=False
+        ).iloc[0]
+
+        # SUMMARY BOX
+        st.subheader(
+            ":material/insights: Summary Box"
         )
 
-        c3.metric(
-            "Population Difference",
-            f"{difference:,.0f}",
-            delta=f"{difference / first_total * 100:.2f}%"
-            if first_total else None
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            summary_card(
+                f"Population {first_year}",
+                f"{first_total:,.0f}",
+                "Combined district values",
+                "#1565C0"
+            )
+
+        with col2:
+            summary_card(
+                f"Population {last_year}",
+                f"{last_total:,.0f}",
+                "Combined district values",
+                "#00897B"
+            )
+
+        with col3:
+            summary_card(
+                "Population Change",
+                f"{population_change:+,.0f}",
+                "Change across study period",
+                "#E53935"
+            )
+
+        with col4:
+            summary_card(
+                "Percentage Change",
+                f"{percentage_change:+.2f}%",
+                "2020 to 2024",
+                "#F57C00"
+            )
+
+        st.info(
+            f"District with the highest population in "
+            f"{last_year}: {highest_latest['district']} "
+            f"({highest_latest['population']:,.0f})."
         )
 
         st.divider()
 
-        # ACTUAL GRAPH 3
+        # ORIGINAL GRAPH 3
+        st.subheader(
+            ":material/show_chart: Visualization 3"
+        )
+
         fig3 = px.line(
             df_population_graph,
             x="year",
             y="population",
             color="district",
             markers=True,
-            color_discrete_sequence=district_colors,
+            color_discrete_sequence=[
+                "#E53935",
+                "#1565C0",
+                "#00A6A6",
+                "#8E24AA",
+                "#F57C00",
+                "#2E7D32",
+                "#EC407A",
+                "#5C6BC0",
+                "#795548",
+                "#00838F",
+                "#9E9D24",
+                "#6D4C41"
+            ],
             title="Population Trends by District in Kedah (2020-2024)",
             labels={
                 "year": "Year",
@@ -945,104 +1148,91 @@ elif page == "📈 Objective 3 - Population":
             title=dict(
                 text="<b>Population Trends by District in Kedah (2020-2024)</b>",
                 x=0.5,
-                font=dict(size=19, color="#123B63")
-            ),
-            height=700,
-            width=1100,
-            margin=dict(
-                l=90,
-                r=120,
-                t=100,
-                b=80
+                xanchor="center",
+                font=dict(size=20, color="#123B63")
             ),
             xaxis=dict(
-                title="<b>Year</b>",
+                title="Year",
                 tickmode="linear",
                 dtick=1,
                 showline=True,
                 linewidth=2,
                 linecolor="black",
+                showgrid=True,
                 gridcolor="#D9E2F0"
             ),
             yaxis=dict(
-                title="<b>Population (Thousands)</b>",
-                tickformat=",.0f",
+                title="Population (Thousands)",
                 showline=True,
                 linewidth=2,
                 linecolor="black",
+                tickformat=",.0f",
+                showgrid=True,
                 gridcolor="#D9E2F0"
             ),
             legend=dict(
-                title="<b>District</b>",
+                title="District",
                 bgcolor="white",
                 bordercolor="#B0BEC5",
                 borderwidth=1
             ),
-            hovermode="x unified"
+            height=650,
+            margin=dict(
+                l=90, r=120, t=100, b=80
+            )
         )
 
-        # DISPLAY GRAPH
         st.plotly_chart(
             fig3,
-            use_container_width=True,
-            key="graph3"
+            use_container_width=True
         )
 
-        st.subheader("🔍 Key Findings")
+        # INTERPRETATION
+        st.subheader(
+            ":material/analytics: Interpretation and Discussion"
+        )
 
-        if difference > 0:
-
-            st.success(
-                f"The combined population values increased "
-                f"by {difference:,.0f} between "
-                f"{first_year} and {last_year}."
-            )
-
-        elif difference < 0:
-
-            st.warning(
-                f"The combined population values decreased "
-                f"by {abs(difference):,.0f} between "
-                f"{first_year} and {last_year}."
-            )
-
+        if population_change > 0:
+            trend_word = "increased"
+        elif population_change < 0:
+            trend_word = "decreased"
         else:
+            trend_word = "remained unchanged"
 
-            st.info(
-                "The combined population values remained unchanged."
-            )
-
-        st.subheader("📝 Interpretation and Discussion")
-
-        st.markdown("""
+        st.markdown(f"""
         The line chart presents population trends across
-        districts in Kedah from 2020 to 2024. Each coloured
-        line represents a district, and each marker indicates
-        the population recorded for a particular year.
-        The direction of the lines helps identify increasing,
-        decreasing or relatively stable population patterns.
+        districts in Kedah from {first_year} to {last_year}.
+        Each coloured line represents a district, while
+        the markers indicate population values for
+        individual years.
 
-        These changes provide information about differences
-        in population development across districts. Such
-        patterns are useful for understanding population
-        distribution and supporting planning for public
-        facilities, infrastructure and local services.
+        The combined population values across the included
+        districts {trend_word} by
+        {abs(population_change):,.0f}, equivalent to
+        {percentage_change:+.2f}% between the first and
+        latest year. Differences in line direction and
+        slope reveal variations in population changes
+        between districts. These patterns are useful for
+        understanding population distribution and may
+        support planning for public facilities and
+        infrastructure.
         """)
 
         with st.expander("View Detailed Population Data"):
 
             st.dataframe(
                 df_population_graph,
-                use_container_width=True
+                use_container_width=True,
+                hide_index=True
             )
 
     else:
 
-        st.warning("No population records available.")
+        st.warning("No population records found.")
 
 
 # ============================================================
-# FOOTER
+# 12. FOOTER
 # ============================================================
 
 st.divider()
@@ -1062,6 +1252,9 @@ Scientific Visualization Project
 
 <br>
 
+Household Income and Population Analysis
+
+<br>
 
 2020–2024 | Kedah, Malaysia
 
