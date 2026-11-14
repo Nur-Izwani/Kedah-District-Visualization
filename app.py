@@ -413,9 +413,9 @@ page = st.sidebar.radio(
     "NAVIGATION",
     [
         ":material/dashboard: Dashboard Overview",
-        ":material/account_balance_wallet: Visualization 1",
-        ":material/scatter_plot: Visualization 2",
-        ":material/show_chart: Visualization 3"
+        ":material/account_balance_wallet: Objective 1 - Income",
+        ":material/scatter_plot: Objective 2 - Scatter Plot",
+        ":material/show_chart: Objective 3 - Population"
     ]
 )
 
@@ -448,7 +448,7 @@ st.markdown("""
 <h1>KEDAH DATA INSIGHTS</h1>
 
 <p>
-Household Income, Population, Poverty
+Household Income, Population and District Analysis
 </p>
 
 <p>
@@ -467,7 +467,7 @@ if "Dashboard Overview" in page:
 
     st.markdown(
         '<div class="section-title">'
-        'Dashboard Overview'
+        ':material/dashboard: Dashboard Overview'
         '</div>',
         unsafe_allow_html=True
     )
@@ -581,7 +581,8 @@ elif "Objective 1" in page:
 
     st.markdown(
         '<div class="section-title">'
-        'OBJECTIVE 1:' 
+        ':material/account_balance_wallet: '
+        'OBJECTIVE 1: HOUSEHOLD INCOME'
         '</div>',
         unsafe_allow_html=True
     )
@@ -776,8 +777,8 @@ elif "Objective 2" in page:
 
     st.markdown(
         '<div class="section-title">'
-
-        'OBJECTIVE 2:'
+        ':material/scatter_plot: '
+        'OBJECTIVE 2: POPULATION VS INCOME'
         '</div>',
         unsafe_allow_html=True
     )
@@ -998,7 +999,8 @@ elif "Objective 3" in page:
 
     st.markdown(
         '<div class="section-title">'
-        'OBJECTIVE 3:'
+        ':material/show_chart: '
+        'OBJECTIVE 3: POPULATION TRENDS'
         '</div>',
         unsafe_allow_html=True
     )
@@ -1254,4 +1256,3 @@ Household Income and Population Analysis
 
 </div>
 """, unsafe_allow_html=True)
-
