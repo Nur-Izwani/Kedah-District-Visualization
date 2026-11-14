@@ -467,7 +467,7 @@ if "Dashboard Overview" in page:
 
     st.markdown(
         '<div class="section-title">'
-        ':material/dashboard: Dashboard Overview'
+        'Dashboard Overview'
         '</div>',
         unsafe_allow_html=True
     )
