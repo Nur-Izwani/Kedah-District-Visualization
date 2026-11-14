@@ -1062,9 +1062,6 @@ Scientific Visualization Project
 
 <br>
 
-Household Income and Population Analysis
-
-<br>
 
 2020–2024 | Kedah, Malaysia
 
