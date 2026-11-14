@@ -16,7 +16,7 @@ import plotly.express as px
 
 st.set_page_config(
     page_title="Kedah Data Insights",
-    page_icon="K",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -381,18 +381,17 @@ chart_theme = {
 # ============================================================
 
 def summary_card(label, value, detail, color):
-    """Render a summary card using native Streamlit elements.
 
-    This avoids Markdown interpreting indented HTML as a code block.
-    """
-    with st.container(border=True):
-        st.caption(label)
-        st.markdown(
-            f"<h2 style='color:{color}; margin:0.25rem 0;'>"
-            f"{value}</h2>",
-            unsafe_allow_html=True
-        )
-        st.caption(detail)
+    html = (
+        '<div class="summary-card" '
+        f'style="border-top:5px solid {color};">'
+        f'<div class="summary-label">{label}</div>'
+        f'<div class="summary-value">{value}</div>'
+        f'<div class="summary-detail">{detail}</div>'
+        '</div>'
+    )
+
+    st.markdown(html, unsafe_allow_html=True)
 
 
 # ============================================================
@@ -412,10 +411,10 @@ st.sidebar.divider()
 page = st.sidebar.radio(
     "NAVIGATION",
     [
-        ":material/dashboard: Dashboard Overview",
-        ":material/account_balance_wallet: Objective 1 - Income",
-        ":material/scatter_plot: Objective 2 - Scatter Plot",
-        ":material/show_chart: Objective 3 - Population"
+        ":material/dashboard: Dashboard",
+        ":material/bar_chart: Visualization 1",
+        ":material/scatter_plot: Visualization 2",
+        ":material/show_chart: Visualization 3"
     ]
 )
 
@@ -463,11 +462,11 @@ SCIENTIFIC VISUALIZATION | KEDAH, MALAYSIA
 # PAGE 1: DASHBOARD OVERVIEW
 # ============================================================
 
-if "Dashboard Overview" in page:
+if "Dashboard" in page:
 
     st.markdown(
         '<div class="section-title">'
-        ':material/dashboard: Dashboard Overview'
+        ':material/dashboard: Dashboard'
         '</div>',
         unsafe_allow_html=True
     )
@@ -577,7 +576,7 @@ if "Dashboard Overview" in page:
 # PAGE 2: OBJECTIVE 1
 # ============================================================
 
-elif "Objective 1" in page:
+elif "Visualization 1" in page:
 
     st.markdown(
         '<div class="section-title">'
@@ -773,7 +772,7 @@ elif "Objective 1" in page:
 # PAGE 3: OBJECTIVE 2
 # ============================================================
 
-elif "Objective 2" in page:
+elif "Visualization 2" in page:
 
     st.markdown(
         '<div class="section-title">'
@@ -995,7 +994,7 @@ elif "Objective 2" in page:
 # PAGE 4: OBJECTIVE 3
 # ============================================================
 
-elif "Objective 3" in page:
+elif "Visualization 3" in page:
 
     st.markdown(
         '<div class="section-title">'
