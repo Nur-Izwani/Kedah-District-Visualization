@@ -1199,7 +1199,6 @@ st.markdown(
     """
     <div class="footer">
         <b style="color:#123B63;">MALAYSIA DATA INSIGHTS</b><br>
-        JIE42403 · Scientific Visualization<br>
         Household Income, Poverty and Population Analysis · Malaysia
     </div>
     """,
