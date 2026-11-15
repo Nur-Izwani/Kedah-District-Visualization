@@ -131,10 +131,35 @@ st.markdown("""
         background: #FFFFFF;
         border: 1px solid #DCE6F2;
         border-left: 5px solid #16A6A0;
-        border-radius: 13px;
-        padding: 18px 22px;
+        border-radius: 15px;
+        padding: 24px 24px;
         margin: 8px 0 20px 0;
+        height: 250px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
         box-shadow: 0 3px 12px rgba(18, 59, 99, 0.05);
+    }
+
+    .objective-card h4 {
+        color: #123B63;
+        font-size: 22px;
+        font-weight: 750;
+        margin: 0 0 20px 0;
+    }
+
+    .objective-card p {
+        color: #40536A;
+        font-size: 16px;
+        margin: 0;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+        .objective-card {
+            height: auto;
+            min-height: 190px;
+        }
     }
 
     .objective-card h4 {
@@ -519,10 +544,8 @@ if page == "Home":
         st.markdown(
             """
             <div class="objective-card">
-                <h4><span class="material-symbols-rounded">payments</span> Objective 1 – Household Income</h4>
-                <p>To identify and compare the 10 districts with the highest and
-                lowest mean household income in Malaysia in 2024.</p>
-                <br><b>Visualization:</b> Grouped Horizontal Bar Chart (Top 10 and Bottom 10)
+                <h4>Objective 1</h4>
+                <p>Mengenal pasti dan membandingkan daerah yang mempunyai pendapatan purata isi rumah tertinggi dan terendah di Malaysia bagi tahun 2022 dan 2024.</p>
             </div>
             """,
             unsafe_allow_html=True
@@ -532,10 +555,8 @@ if page == "Home":
         st.markdown(
             """
             <div class="objective-card">
-                <h4><span class="material-symbols-rounded">trending_down</span> Objective 2 – Poverty and Income</h4>
-                <p>To examine the relationship between absolute poverty
-                and mean household income across districts in Malaysia.</p>
-                <br><b>Visualization:</b> Scatter Plot with Trendline
+                <h4>Objective 2</h4>
+                <p>To examine the relationship between absolute poverty and mean household income across districts in Malaysia.</p>
             </div>
             """,
             unsafe_allow_html=True
@@ -545,10 +566,8 @@ if page == "Home":
         st.markdown(
             """
             <div class="objective-card">
-                <h4><span class="material-symbols-rounded">groups</span> Objective 3 – Population</h4>
-                <p>To analyze population trends across districts
-                in Malaysia from 2020 to 2024.</p>
-                <br><b>Visualization:</b> Multi-Line Chart
+                <h4>Objective 3</h4>
+                <p>To analyze population trends across districts in Malaysia from 2020 to 2024.</p>
             </div>
             """,
             unsafe_allow_html=True
@@ -606,8 +625,7 @@ elif page == "Household Income Analysis":
         """
         <div class="objective-card">
             <h4><span class="material-symbols-rounded">track_changes</span> Objective 1</h4>
-            <p>To identify and compare the 10 districts with the highest and
-            lowest mean household income in Malaysia in 2024.</p>
+            <p>Mengenal pasti dan membandingkan daerah yang mempunyai pendapatan purata isi rumah tertinggi dan terendah di Malaysia bagi tahun 2022 dan 2024.</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -623,37 +641,65 @@ elif page == "Household Income Analysis":
             key="income_state_filter"
         )
 
-        # Use 2024 to determine the ranking. The selected districts are then
-        # displayed for both 2022 and 2024 to retain the year comparison.
-        income_2024 = df_graph1[
-            df_graph1["year_label"] == "2024"
+        # Rank districts separately for 2022 and 2024.
+        # The combined list includes each year's Top 10 and Bottom 10 districts.
+        income_rank_years = df_graph1[
+            df_graph1["year_label"].isin(["2022", "2024"])
         ].dropna(subset=["income_mean"]).copy()
 
         if selected_state == "All States":
-            top10_2024 = income_2024.nlargest(10, "income_mean")
-            bottom10_2024 = income_2024.nsmallest(10, "income_mean")
+            selected_keys_list = []
 
-            ranked_2024 = pd.concat(
-                [top10_2024, bottom10_2024],
-                ignore_index=True
-            ).drop_duplicates(subset=["state", "district"])
+            for ranking_year in ["2022", "2024"]:
+                year_data = income_rank_years[
+                    income_rank_years["year_label"] == ranking_year
+                ].copy()
 
-            selected_keys = ranked_2024[["state", "district"]].drop_duplicates()
+                top10_year = year_data.nlargest(10, "income_mean")
+                bottom10_year = year_data.nsmallest(10, "income_mean")
+
+                selected_keys_list.append(
+                    pd.concat([top10_year, bottom10_year])[["state", "district"]]
+                )
+
+            selected_keys = (
+                pd.concat(selected_keys_list)
+                .drop_duplicates()
+                .reset_index(drop=True)
+            )
+
             income_view = df_graph1.merge(
                 selected_keys,
                 on=["state", "district"],
                 how="inner"
             )
-            view_description = "Top 10 highest and Top 10 lowest districts in Malaysia, ranked using 2024 mean income."
-            chart_title = "Top 10 Highest and Top 10 Lowest Mean Household Income by District in Malaysia"
-            ranking_note = "Ranking is based on 2024 mean household income. Both 2022 and 2024 values are shown for the selected districts."
+
+            view_description = (
+                "Top 10 highest and Top 10 lowest districts are identified "
+                "separately for 2022 and 2024 across Malaysia."
+            )
+            chart_title = (
+                "Top 10 Highest and Lowest Mean Household Income "
+                "by District in Malaysia (2022 and 2024)"
+            )
+            ranking_note = (
+                "Districts are ranked separately for each year. The chart "
+                "compares 2022 and 2024 values for the combined list of "
+                "districts selected from both years."
+            )
         else:
             income_view = df_graph1[
                 df_graph1["state"] == selected_state
             ].copy()
             view_description = f"All available districts in {selected_state}."
-            chart_title = f"Mean Household Income by District in {selected_state}"
-            ranking_note = f"All available districts in {selected_state} are displayed. The highest and lowest values are identified using 2024 data."
+            chart_title = (
+                f"Mean Household Income by District in {selected_state} "
+                "(2022 and 2024)"
+            )
+            ranking_note = (
+                f"All available districts in {selected_state} are displayed "
+                "for comparison between 2022 and 2024."
+            )
 
         if income_view.empty:
             st.warning("No district income records are available for this selection.")
@@ -672,7 +718,7 @@ elif page == "Household Income Analysis":
                 summary_card(
                     ":material/location_on: Districts Displayed",
                     str(district_count),
-                    "20 ranked districts for All States; all districts for a selected state" if selected_state == "All States" else f"Districts in {selected_state}",
+                    "Up to 40 unique districts selected from yearly Top 10 and Bottom 10 rankings" if selected_state == "All States" else f"All districts in {selected_state}",
                     BLUE
                 )
             with s2:
@@ -694,7 +740,7 @@ elif page == "Household Income Analysis":
                         ORANGE
                     )
 
-            st.markdown("### :material/query_stats: Mean Household Income by District")
+            st.markdown("### :material/query_stats: Highest and Lowest Mean Household Income by District")
             st.caption(view_description + " " + ranking_note)
 
             # Sort districts by their 2024 mean income so the chart reads
@@ -1192,6 +1238,7 @@ elif page == "Population Analysis":
                 use_container_width=True,
                 hide_index=True
             )
+
 # ------------------------------------------------------------
 # 11. FOOTER
 # ------------------------------------------------------------
