@@ -782,7 +782,7 @@ elif page == "Household Income Analysis":
                 summary_card(
                     ":material/location_on: Districts Displayed",
                     str(district_count),
-                    "Up to 40 unique districts selected from yearly Top 10 and Bottom 10 rankings" if selected_state == "All States" else f"All districts in {selected_state}",
+                    "Districts selected from yearly Top 10 and Bottom 10 rankings" if selected_state == "All States" else f"All districts in {selected_state}",
                     BLUE
                 )
             with s2:
