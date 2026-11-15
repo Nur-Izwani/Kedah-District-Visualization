@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 # ------------------------------------------------------------
 st.set_page_config(
     page_title="Malaysia Data Insights",
-    page_icon="📊",
+    page_icon="M",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -25,6 +25,22 @@ st.set_page_config(
 # ------------------------------------------------------------
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0');
+
+    .material-symbols-rounded {
+        font-family: 'Material Symbols Rounded';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 1.15em;
+        line-height: 1;
+        display: inline-flex;
+        vertical-align: -0.18em;
+        white-space: nowrap;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+    }
+
     .stApp {
         background: #F4F7FC;
     }
@@ -35,6 +51,48 @@ st.markdown("""
 
     [data-testid="stSidebar"] * {
         color: #FFFFFF;
+    }
+
+    /* Navigation options styled as rounded cards */
+    [data-testid="stSidebar"] [data-testid="stRadio"] > div {
+        gap: 9px;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stRadio"] label {
+        background: #1E2B42;
+        border: 1px solid #34445D;
+        border-radius: 14px;
+        padding: 10px 14px;
+        min-height: 52px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
+        background: #263B55;
+        border-color: #20C9B5;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {
+        background: #075B59;
+        border: 1.5px solid #20D6C2;
+        box-shadow: 0 3px 12px rgba(0, 214, 194, 0.12);
+    }
+
+    [data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) p {
+        font-weight: 750;
+        color: #FFFFFF !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stRadio"] label p {
+        font-size: 15px;
+        margin: 0;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stRadio"] input {
+        accent-color: #E34B67;
     }
 
     .hero {
@@ -326,6 +384,12 @@ plotly_layout = dict(
 )
 
 def summary_card(label, value, detail, accent):
+    import re
+    label = re.sub(
+        r":material/([a-z_]+):",
+        r'<span class="material-symbols-rounded">\1</span>',
+        label
+    )
     st.markdown(
         f"""
         <div class="summary-card" style="border-top-color:{accent};">
@@ -361,7 +425,7 @@ st.sidebar.markdown(
     """
     <div style="padding:10px 2px 16px 2px;">
         <div style="font-size:23px;font-weight:850;line-height:1.2;">
-            📊 MALAYSIA<br>DATA INSIGHTS
+            <span class="material-symbols-rounded">query_stats</span> MALAYSIA<br>DATA INSIGHTS
         </div>
         <div style="font-size:12px;color:#D8F0F5;margin-top:8px;">
             Scientific Visualization Dashboard
@@ -372,21 +436,21 @@ st.sidebar.markdown(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🧭 NAVIGATION")
+st.sidebar.markdown("### :material/analytics: Select Analysis")
 
 page = st.sidebar.radio(
-    "Select page",
+    "Select analysis",
     [
-        "Dashboard",
-        "Visualization 1 - Income",
-        "Visualization 2 - Poverty",
-        "Visualization 3 - Population"
+        "Home",
+        "Household Income Analysis",
+        "Poverty Analysis",
+        "Population Analysis"
     ],
     label_visibility="collapsed"
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 📌 STUDY INFORMATION")
+st.sidebar.markdown("### :material/info: STUDY INFORMATION")
 st.sidebar.markdown(
     """
     **Study Area:** Malaysia
@@ -407,7 +471,7 @@ st.sidebar.caption("JIE42403 | Scientific Visualization")
 st.markdown(
     """
     <div class="hero">
-        <h1>📊 MALAYSIA DATA INSIGHTS</h1>
+        <h1><span class="material-symbols-rounded">query_stats</span> MALAYSIA DATA INSIGHTS</h1>
         <p>Household Income, Poverty and Population Analysis</p>
         <p>Scientific Visualization Project · Malaysia · 2020–2024</p>
     </div>
@@ -418,10 +482,10 @@ st.markdown(
 # ============================================================
 # PAGE 1: DASHBOARD
 # ============================================================
-if page == "Dashboard":
+if page == "Home":
 
     st.markdown(
-        '<div class="section-heading">🏠 Dashboard Overview</div>',
+        '<div class="section-heading"><span class="material-symbols-rounded">home</span> Dashboard Overview</div>',
         unsafe_allow_html=True
     )
     st.write(
@@ -435,15 +499,15 @@ if page == "Dashboard":
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        summary_card("🗺️ States", f"{total_states}", "Population dataset", BLUE)
+        summary_card(":material/map: States", f"{total_states}", "Population dataset", BLUE)
     with c2:
-        summary_card("📍 Districts", f"{total_districts}", "Population dataset", TEAL)
+        summary_card(":material/location_on: Districts", f"{total_districts}", "Population dataset", TEAL)
     with c3:
-        summary_card("💰 Income & Poverty", "2022 / 2024", "Comparison years", ORANGE)
+        summary_card(":material/payments: Income & Poverty", "2022 / 2024", "Comparison years", ORANGE)
     with c4:
-        summary_card("👥 Population", "2020–2024", "Five-year study period", PURPLE)
+        summary_card(":material/groups: Population", "2020–2024", "Five-year study period", PURPLE)
 
-    st.markdown("### 🎯 Research Objectives")
+    st.markdown("### :material/track_changes: Research Objectives")
 
     o1, o2, o3 = st.columns(3)
 
@@ -451,7 +515,7 @@ if page == "Dashboard":
         st.markdown(
             """
             <div class="objective-card">
-                <h4>💰 Objective 1 – Household Income</h4>
+                <h4><span class="material-symbols-rounded">payments</span> Objective 1 – Household Income</h4>
                 <p>To compare mean household income across districts
                 in Malaysia between 2022 and 2024.</p>
                 <br><b>Visualization:</b> Grouped Horizontal Bar Chart
@@ -464,7 +528,7 @@ if page == "Dashboard":
         st.markdown(
             """
             <div class="objective-card">
-                <h4>📉 Objective 2 – Poverty and Income</h4>
+                <h4><span class="material-symbols-rounded">trending_down</span> Objective 2 – Poverty and Income</h4>
                 <p>To examine the relationship between absolute poverty
                 and mean household income across districts in Malaysia.</p>
                 <br><b>Visualization:</b> Scatter Plot with Trendline
@@ -477,7 +541,7 @@ if page == "Dashboard":
         st.markdown(
             """
             <div class="objective-card">
-                <h4>👥 Objective 3 – Population</h4>
+                <h4><span class="material-symbols-rounded">groups</span> Objective 3 – Population</h4>
                 <p>To analyze population trends across districts
                 in Malaysia from 2020 to 2024.</p>
                 <br><b>Visualization:</b> Multi-Line Chart
@@ -486,9 +550,9 @@ if page == "Dashboard":
             unsafe_allow_html=True
         )
 
-    st.markdown("### 🗃️ Dataset Information")
+    st.markdown("### :material/folder_open: Dataset Information")
     t1, t2, t3 = st.tabs(
-        ["💰 Household Income", "📉 Household Poverty", "👥 Population"]
+        [":material/payments: Household Income", ":material/trending_down: Household Poverty", ":material/groups: Population"]
     )
 
     with t1:
@@ -503,7 +567,7 @@ if page == "Dashboard":
         st.caption("Population dataset · 2020–2024 · both / overall / overall")
         st.dataframe(df_pop.head(10), use_container_width=True, hide_index=True)
 
-    st.markdown("### 🔎 Data Coverage")
+    st.markdown("### :material/search: Data Coverage")
     coverage = pd.DataFrame({
         "Dataset": ["Household Income", "Household Poverty", "Population"],
         "Available years": [
@@ -527,17 +591,17 @@ if page == "Dashboard":
 # ============================================================
 # PAGE 2: VISUALIZATION 1 - INCOME
 # ============================================================
-elif page == "Visualization 1 - Income":
+elif page == "Household Income Analysis":
 
     st.markdown(
-        '<div class="section-heading">💰 Visualization 1 – Household Income</div>',
+        '<div class="section-heading"><span class="material-symbols-rounded">payments</span> Visualization 1 – Household Income</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
         """
         <div class="objective-card">
-            <h4>🎯 Objective 1</h4>
+            <h4><span class="material-symbols-rounded">track_changes</span> Objective 1</h4>
             <p>To compare mean household income across districts in
             Malaysia between 2022 and 2024.</p>
         </div>
@@ -551,7 +615,7 @@ elif page == "Visualization 1 - Income":
         # Optional state selector while retaining all districts
         states = sorted(df_graph1["state"].dropna().unique())
         selected_state = st.selectbox(
-            "🗺️ Filter by State",
+            ":material/map: Filter by State",
             ["All States"] + states
         )
 
@@ -580,22 +644,22 @@ elif page == "Visualization 1 - Income":
 
         s1, s2, s3 = st.columns(3)
         with s1:
-            summary_card("📍 Districts Displayed", str(state_district_count),
+            summary_card(":material/location_on: Districts Displayed", str(state_district_count),
                          "Selected geographic coverage", BLUE)
         with s2:
             if not highest_2024.empty:
                 row = highest_2024.iloc[0]
-                summary_card("🏆 Highest Income (2024)",
+                summary_card(":material/emoji_events: Highest Income (2024)",
                              f"RM {row['income_mean']:,.0f}",
                              f"{row['district']}, {row['state']}", TEAL)
         with s3:
             if not lowest_2024.empty:
                 row = lowest_2024.iloc[0]
-                summary_card("📌 Lowest Income (2024)",
+                summary_card(":material/push_pin: Lowest Income (2024)",
                              f"RM {row['income_mean']:,.0f}",
                              f"{row['district']}, {row['state']}", ORANGE)
 
-        st.markdown("### 📊 Mean Household Income by District")
+        st.markdown("### :material/query_stats: Mean Household Income by District")
         st.caption(
             "Grouped horizontal bars compare district mean household "
             "income in 2022 and 2024. The year legend is displayed on the right."
@@ -667,7 +731,7 @@ elif page == "Visualization 1 - Income":
 
         st.plotly_chart(fig1, use_container_width=True)
 
-        st.markdown("### 📝 Interpretation and Discussion")
+        st.markdown("### :material/description: Interpretation and Discussion")
         inc22 = income_view[income_view["year_label"] == "2022"]["income_mean"].mean()
         inc24 = income_view[income_view["year_label"] == "2024"]["income_mean"].mean()
 
@@ -688,7 +752,7 @@ elif page == "Visualization 1 - Income":
                 "individual districts and the two selected years."
             )
 
-        with st.expander("📋 View income data"):
+        with st.expander(":material/table_view: View income data"):
             st.dataframe(
                 income_view[
                     ["state", "district", "year_label", "income_mean"]
@@ -700,17 +764,17 @@ elif page == "Visualization 1 - Income":
 # ============================================================
 # PAGE 3: VISUALIZATION 2 - POVERTY AND INCOME
 # ============================================================
-elif page == "Visualization 2 - Poverty":
+elif page == "Poverty Analysis":
 
     st.markdown(
-        '<div class="section-heading">📉 Visualization 2 – Poverty and Income</div>',
+        '<div class="section-heading"><span class="material-symbols-rounded">trending_down</span> Visualization 2 – Poverty and Income</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
         """
         <div class="objective-card">
-            <h4>🎯 Objective 2</h4>
+            <h4><span class="material-symbols-rounded">track_changes</span> Objective 2</h4>
             <p>To examine the relationship between absolute poverty
             and mean household income across districts in Malaysia.</p>
         </div>
@@ -726,7 +790,7 @@ elif page == "Visualization 2 - Poverty":
             reverse=True
         )
         selected_year = st.selectbox(
-            "📅 Select Year",
+            ":material/calendar_month: Select Year",
             available_years,
             format_func=lambda year: str(year)
         )
@@ -738,7 +802,7 @@ elif page == "Visualization 2 - Poverty":
         # State filter
         states = sorted(scatter_view["state"].dropna().unique())
         selected_state = st.selectbox(
-            "🗺️ Filter by State",
+            ":material/map: Filter by State",
             ["All States"] + states,
             key="poverty_state"
         )
@@ -764,19 +828,19 @@ elif page == "Visualization 2 - Poverty":
 
             s1, s2, s3 = st.columns(3)
             with s1:
-                summary_card("📍 Districts Analysed", str(len(scatter_view)),
+                summary_card(":material/location_on: Districts Analysed", str(len(scatter_view)),
                              f"Year {selected_year}", BLUE)
             with s2:
-                summary_card("📈 Pearson Correlation",
+                summary_card(":material/trending_up: Pearson Correlation",
                              f"{correlation:.3f}" if pd.notna(correlation) else "N/A",
                              "Income and absolute poverty", TEAL)
             with s3:
-                summary_card("⚠️ Highest Poverty",
+                summary_card(":material/warning: Highest Poverty",
                              f"{high_poverty['poverty_absolute']:.2f}%",
                              f"{high_poverty['district']}, {high_poverty['state']}",
                              ORANGE)
 
-            st.markdown("### 🔎 Absolute Poverty vs Mean Household Income")
+            st.markdown("### :material/search: Absolute Poverty vs Mean Household Income")
             st.caption(
                 "Each point represents a district. The trendline shows "
                 "the overall linear pattern for the selected year."
@@ -837,7 +901,7 @@ elif page == "Visualization 2 - Poverty":
 
             st.plotly_chart(fig2, use_container_width=True)
 
-            st.markdown("### 📝 Interpretation and Discussion")
+            st.markdown("### :material/description: Interpretation and Discussion")
             if pd.isna(correlation):
                 corr_text = "The correlation could not be calculated."
             elif correlation < 0:
@@ -865,7 +929,7 @@ elif page == "Visualization 2 - Poverty":
                 + " Correlation describes association and does not establish causation."
             )
 
-            with st.expander("📋 View poverty and income data"):
+            with st.expander(":material/table_view: View poverty and income data"):
                 st.dataframe(
                     scatter_view[
                         ["state", "district", "year",
@@ -878,17 +942,17 @@ elif page == "Visualization 2 - Poverty":
 # ============================================================
 # PAGE 4: VISUALIZATION 3 - POPULATION
 # ============================================================
-elif page == "Visualization 3 - Population":
+elif page == "Population Analysis":
 
     st.markdown(
-        '<div class="section-heading">👥 Visualization 3 – Population</div>',
+        '<div class="section-heading"><span class="material-symbols-rounded">groups</span> Visualization 3 – Population</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
         """
         <div class="objective-card">
-            <h4>🎯 Objective 3</h4>
+            <h4><span class="material-symbols-rounded">track_changes</span> Objective 3</h4>
             <p>To analyze population trends across districts
             in Malaysia from 2020 to 2024.</p>
         </div>
@@ -901,7 +965,7 @@ elif page == "Visualization 3 - Population":
     else:
         states = sorted(df_graph3["state"].dropna().unique())
         selected_state = st.selectbox(
-            "🗺️ Filter by State",
+            ":material/map: Filter by State",
             ["All States"] + states
         )
 
@@ -928,24 +992,24 @@ elif page == "Visualization 3 - Population":
 
         s1, s2, s3 = st.columns(3)
         with s1:
-            summary_card("📍 Districts Analysed", str(total_districts),
+            summary_card(":material/location_on: Districts Analysed", str(total_districts),
                          "Selected geographic coverage", BLUE)
         with s2:
             if not highest.empty:
                 row = highest.iloc[0]
-                summary_card("🏆 Highest Population",
+                summary_card(":material/emoji_events: Highest Population",
                              f"{row['population']:,.0f}",
                              f"{row['district']}, {row['state']} ({last_year})",
                              TEAL)
         with s3:
             if not lowest.empty:
                 row = lowest.iloc[0]
-                summary_card("📌 Lowest Population",
+                summary_card(":material/push_pin: Lowest Population",
                              f"{row['population']:,.0f}",
                              f"{row['district']}, {row['state']} ({last_year})",
                              ORANGE)
 
-        st.markdown("### 📈 Population Trends by District")
+        st.markdown("### :material/trending_up: Population Trends by District")
         st.caption(
             "Each line represents a district. Line colours represent states. "
             "Use the state filter above to reduce the number of lines."
@@ -1034,7 +1098,7 @@ elif page == "Visualization 3 - Population":
 
         st.plotly_chart(fig3, use_container_width=True)
 
-        st.markdown("### 📝 Interpretation and Discussion")
+        st.markdown("### :material/description: Interpretation and Discussion")
 
         annual_summary = (
             population_view.groupby("year")["population"]
@@ -1063,14 +1127,14 @@ elif page == "Visualization 3 - Population":
                 "increasing, decreasing or relatively stable population patterns."
             )
 
-        with st.expander("📋 View population summary by year"):
+        with st.expander(":material/table_view: View population summary by year"):
             st.dataframe(
                 annual_summary,
                 use_container_width=True,
                 hide_index=True
             )
 
-        with st.expander("📋 View population data by district"):
+        with st.expander(":material/table_view: View population data by district"):
             st.dataframe(
                 population_view.sort_values(
                     ["state", "district", "year"]
