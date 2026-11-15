@@ -607,8 +607,8 @@ if page == "Home":
     with o1:
         st.markdown(
             """
-            <div class="objective-card">
-                <h4>Objective 1</h4>
+            <div class="objective-card objective-compact">
+                <div class="objective-card-heading"><span class="objective-icon material-symbols-rounded">payments</span><span>OBJECTIVE 1</span><span class="objective-period">2022 – 2024</span></div>
                 <p>To identify and compare the districts with the highest and lowest mean household income in Malaysia in 2022 and 2024.</p>
             </div>
             """,
@@ -618,8 +618,8 @@ if page == "Home":
     with o2:
         st.markdown(
             """
-            <div class="objective-card">
-                <h4>Objective 2</h4>
+            <div class="objective-card objective-compact">
+                <div class="objective-card-heading"><span class="objective-icon material-symbols-rounded">trending_down</span><span>OBJECTIVE 2</span><span class="objective-period">2022 – 2024</span></div>
                 <p>To examine the relationship between absolute poverty and mean household income across districts in Malaysia.</p>
             </div>
             """,
@@ -629,8 +629,8 @@ if page == "Home":
     with o3:
         st.markdown(
             """
-            <div class="objective-card">
-                <h4>Objective 3</h4>
+            <div class="objective-card objective-compact">
+                <div class="objective-card-heading"><span class="objective-icon material-symbols-rounded">groups</span><span>OBJECTIVE 3</span><span class="objective-period">2020 – 2024</span></div>
                 <p>To analyze population trends across districts in Malaysia from 2020 to 2024.</p>
             </div>
             """,
@@ -931,10 +931,9 @@ elif page == "Poverty Analysis":
 
     st.markdown(
         """
-        <div class="objective-card">
-            <h4><span class="material-symbols-rounded">track_changes</span> Objective 2</h4>
-            <p>To examine the relationship between absolute poverty
-            and mean household income across districts in Malaysia.</p>
+        <div class="objective-card objective-compact">
+            <div class="objective-card-heading"><span class="objective-icon material-symbols-rounded">track_changes</span><span>OBJECTIVE 2</span><span class="objective-period">2022 – 2024</span></div>
+            <p>To examine the relationship between absolute poverty and mean household income across districts in Malaysia.</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -1110,10 +1109,9 @@ elif page == "Population Analysis":
 
     st.markdown(
         """
-        <div class="objective-card">
-            <h4><span class="material-symbols-rounded">track_changes</span> Objective 3</h4>
-            <p>To analyze population trends across districts
-            in Malaysia from 2020 to 2024.</p>
+        <div class="objective-card objective-compact">
+            <div class="objective-card-heading"><span class="objective-icon material-symbols-rounded">track_changes</span><span>OBJECTIVE 3</span><span class="objective-period">2020 – 2024</span></div>
+            <p>To analyze population trends across districts in Malaysia from 2020 to 2024.</p>
         </div>
         """,
         unsafe_allow_html=True
