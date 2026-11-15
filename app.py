@@ -944,22 +944,15 @@ elif page == "Poverty Analysis":
     if df_graph2.empty:
         st.warning("No matched income and poverty records are available.")
     else:
-        available_years = sorted(
-            df_graph2["year"].unique(),
-            reverse=True
-        )
-        selected_year = st.selectbox(
-            ":material/calendar_month: Select Year",
-            available_years,
-            format_func=lambda year: str(year)
-        )
-
-        scatter_view = df_graph2[
-            df_graph2["year"] == selected_year
+        # Keep both comparison years in the same visualization.
+        poverty_view = df_graph2[
+            df_graph2["year"].isin([2022, 2024])
         ].copy()
 
-        # State filter
-        states = sorted(scatter_view["state"].dropna().unique())
+        poverty_view["year_label"] = poverty_view["year"].astype(str)
+
+        # State filter applies to both 2022 and 2024 together.
+        states = sorted(poverty_view["state"].dropna().unique())
         selected_state = st.selectbox(
             ":material/map: Filter by State",
             ["All States"] + states,
@@ -967,51 +960,64 @@ elif page == "Poverty Analysis":
         )
 
         if selected_state != "All States":
-            scatter_view = scatter_view[
-                scatter_view["state"] == selected_state
+            poverty_view = poverty_view[
+                poverty_view["state"] == selected_state
             ].copy()
 
-        if len(scatter_view) < 2:
-            st.warning("At least two districts are needed to show the trendline.")
+        if len(poverty_view) < 2:
+            st.warning("At least two district-year records are needed to show the relationship.")
         else:
-            correlation = scatter_view[
+            correlation = poverty_view[
                 ["poverty_absolute", "income_mean"]
             ].corr().iloc[0, 1]
 
-            high_poverty = scatter_view.loc[
-                scatter_view["poverty_absolute"].idxmax()
+            highest_poverty = poverty_view.loc[
+                poverty_view["poverty_absolute"].idxmax()
             ]
-            low_poverty = scatter_view.loc[
-                scatter_view["poverty_absolute"].idxmin()
-            ]
+
+            district_count = (
+                poverty_view[["state", "district"]]
+                .drop_duplicates()
+                .shape[0]
+            )
 
             s1, s2, s3 = st.columns(3)
             with s1:
-                summary_card(":material/location_on: Districts Analysed", str(len(scatter_view)),
-                             f"Year {selected_year}", BLUE)
+                summary_card(
+                    ":material/location_on: Districts Analysed",
+                    str(district_count),
+                    "2022 and 2024 combined",
+                    BLUE
+                )
             with s2:
-                summary_card(":material/trending_up: Pearson Correlation",
-                             f"{correlation:.3f}" if pd.notna(correlation) else "N/A",
-                             "Income and absolute poverty", TEAL)
+                summary_card(
+                    ":material/trending_up: Pearson Correlation",
+                    f"{correlation:.3f}" if pd.notna(correlation) else "N/A",
+                    "Combined 2022 and 2024 records",
+                    TEAL
+                )
             with s3:
-                summary_card(":material/warning: Highest Poverty",
-                             f"{high_poverty['poverty_absolute']:.2f}%",
-                             f"{high_poverty['district']}, {high_poverty['state']}",
-                             ORANGE)
+                summary_card(
+                    ":material/warning: Highest Poverty",
+                    f"{highest_poverty['poverty_absolute']:.2f}%",
+                    f"{highest_poverty['district']}, {highest_poverty['state']} ({highest_poverty['year']})",
+                    ORANGE
+                )
 
             st.markdown("### :material/search: Absolute Poverty vs Mean Household Income")
 
             fig2 = px.scatter(
-                scatter_view,
+                poverty_view,
                 x="poverty_absolute",
                 y="income_mean",
-                color="year",
+                color="year_label",
                 trendline="ols",
                 trendline_scope="trace",
                 hover_name="district_label",
                 hover_data={
                     "state": True,
                     "district": True,
+                    "year_label": True,
                     "poverty_absolute": ":.2f",
                     "income_mean": ":,.0f"
                 },
@@ -1022,7 +1028,7 @@ elif page == "Poverty Analysis":
                 labels={
                     "poverty_absolute": "Absolute Poverty Rate (%)",
                     "income_mean": "Mean Household Income (RM)",
-                    "year": "Year"
+                    "year_label": "Year"
                 }
             )
 
@@ -1039,13 +1045,21 @@ elif page == "Poverty Analysis":
                 **plotly_layout,
                 height=680,
                 title=dict(
-                    text=f"<b>Relationship Between Absolute Poverty and Mean Household Income ({selected_year})</b>",
+                    text="<b>Relationship Between Absolute Poverty and Mean Household Income (2022 vs 2024)</b>",
                     x=0.5,
                     xanchor="center",
                     font=dict(size=18, color=NAVY)
                 ),
-                showlegend=False,
-                margin=dict(l=100, r=55, t=95, b=85)
+                showlegend=True,
+                legend=dict(
+                    title="Year",
+                    orientation="v",
+                    yanchor="top",
+                    y=1,
+                    xanchor="left",
+                    x=1.02
+                ),
+                margin=dict(l=100, r=130, t=95, b=85)
             )
             style_axes(
                 fig2,
@@ -1063,34 +1077,36 @@ elif page == "Poverty Analysis":
             elif correlation < 0:
                 corr_text = (
                     f"The Pearson correlation is {correlation:.3f}, "
-                    "showing a negative linear relationship. Districts "
-                    "with higher absolute poverty rates tend to have "
-                    "lower mean household income in this dataset."
+                    "showing a negative linear relationship. District-year "
+                    "records with higher absolute poverty rates tend to have "
+                    "lower mean household income in the combined 2022 and 2024 data."
                 )
             elif correlation > 0:
                 corr_text = (
                     f"The Pearson correlation is {correlation:.3f}, "
-                    "showing a positive linear relationship. Districts "
-                    "with higher absolute poverty rates also tend to have "
-                    "higher mean household income in this dataset."
+                    "showing a positive linear relationship. District-year "
+                    "records with higher absolute poverty rates also tend to have "
+                    "higher mean household income in the combined 2022 and 2024 data."
                 )
             else:
                 corr_text = (
                     "The Pearson correlation is 0, indicating no linear "
-                    "relationship in this selected data."
+                    "relationship in the combined 2022 and 2024 data."
                 )
 
             st.write(
                 corr_text
-                + " Correlation describes association and does not establish causation."
+                + " The chart displays both years together, with separate colours "
+                "and trendlines for 2022 and 2024. Correlation describes association "
+                "and does not establish causation."
             )
 
             with st.expander(":material/table_view: View poverty and income data"):
                 st.dataframe(
-                    scatter_view[
+                    poverty_view[
                         ["state", "district", "year",
                          "income_mean", "poverty_absolute"]
-                    ].sort_values(["state", "district"]),
+                    ].sort_values(["state", "district", "year"]),
                     use_container_width=True,
                     hide_index=True
                 )
