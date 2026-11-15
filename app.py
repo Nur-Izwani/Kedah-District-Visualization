@@ -1244,7 +1244,6 @@ elif page == "Population Analysis":
             use_container_width=True,
             hide_index=True
         )
-
     with st.expander(":material/table_view: View population data by district"):
         st.dataframe(
             population_view.sort_values(["state", "district", "year"]),
