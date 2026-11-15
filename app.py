@@ -945,11 +945,21 @@ elif page == "Poverty Analysis":
         st.warning("No matched income and poverty records are available.")
     else:
         # Keep both comparison years in the same visualization.
+        # The year column in df_graph2 is stored as text ("2022", "2024")
+        # because it was converted to string before merging. Filter using strings.
         poverty_view = df_graph2[
-            df_graph2["year"].isin([2022, 2024])
+            df_graph2["year"].astype(str).isin(["2022", "2024"])
         ].copy()
 
         poverty_view["year_label"] = poverty_view["year"].astype(str)
+
+        if poverty_view.empty:
+            st.warning(
+                "No matched records were found for 2022 and 2024. "
+                "Please check that the income and poverty CSV files contain "
+                "both years with matching state and district names."
+            )
+            st.stop()
 
         # State filter applies to both 2022 and 2024 together.
         states = sorted(poverty_view["state"].dropna().unique())
