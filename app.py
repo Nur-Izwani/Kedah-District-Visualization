@@ -241,10 +241,12 @@ st.markdown("""
         background: #FFFFFF;
         border: 1px solid #DCE6F2;
         border-top: 4px solid #3984D6;
-        border-radius: 13px;
-        padding: 17px 18px;
-        min-height: 118px;
-        box-shadow: 0 3px 12px rgba(18, 59, 99, 0.05);
+        border-radius: 14px;
+        padding: 20px 22px;
+        min-height: 158px;
+        height: 100%;
+        box-shadow: 0 4px 14px rgba(18, 59, 99, 0.06);
+        box-sizing: border-box;
     }
 
     .summary-label {
@@ -255,10 +257,10 @@ st.markdown("""
 
     .summary-value {
         color: #123B63;
-        font-size: 25px;
+        font-size: 20px;
         font-weight: 800;
-        margin-top: 7px;
-        line-height: 1.2;
+        margin-top: 10px;
+        line-height: 1.45;
     }
 
     .summary-detail {
@@ -543,19 +545,6 @@ page = st.sidebar.radio(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### :material/info: STUDY INFORMATION")
-st.sidebar.markdown(
-    """
-    **Study Area:** Malaysia
-
-    **Analysis Level:** State and District
-
-    **Income & Poverty:** 2022 and 2024
-
-    **Population:** 2020–2024
-    """
-)
-st.sidebar.markdown("---")
 st.sidebar.caption("JIE42403 | Scientific Visualization")
 
 # ------------------------------------------------------------
@@ -587,18 +576,32 @@ if page == "Home":
         "household income, household poverty and population datasets."
     )
 
-    total_states = df_pop["state"].nunique()
-    total_districts = df_pop[["state", "district"]].drop_duplicates().shape[0]
+    # Study profile: datasets, geographical coverage and study period
+    info1, info2, info3 = st.columns(3)
 
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        summary_card(":material/map: States", f"{total_states}", "Population dataset", BLUE)
-    with c2:
-        summary_card(":material/location_on: Districts", f"{total_districts}", "Population dataset", TEAL)
-    with c3:
-        summary_card(":material/payments: Income & Poverty", "2022 / 2024", "Comparison years", ORANGE)
-    with c4:
-        summary_card(":material/groups: Population", "2020–2024", "Five-year study period", PURPLE)
+    with info1:
+        summary_card(
+            ":material/database: Dataset Names",
+            "Household Income<br>Household Poverty<br>Population",
+            "Three selected datasets",
+            BLUE
+        )
+
+    with info2:
+        summary_card(
+            ":material/public: Study Area",
+            "Malaysia",
+            "All states and districts",
+            TEAL
+        )
+
+    with info3:
+        summary_card(
+            ":material/calendar_month: Study Period",
+            "2020–2024",
+            "Five-year analysis period",
+            PURPLE
+        )
 
     st.markdown("### :material/track_changes: Research Objectives")
 
@@ -782,7 +785,7 @@ elif page == "Household Income Analysis":
                 summary_card(
                     ":material/location_on: Districts Displayed",
                     str(district_count),
-                    "Districts selected from yearly Top 10 and Bottom 10 rankings" if selected_state == "All States" else f"All districts in {selected_state}",
+                    "Up to 40 unique districts selected from yearly Top 10 and Bottom 10 rankings" if selected_state == "All States" else f"All districts in {selected_state}",
                     BLUE
                 )
             with s2:
@@ -805,7 +808,6 @@ elif page == "Household Income Analysis":
                     )
 
             st.markdown("### :material/query_stats: Highest and Lowest Mean Household Income by District")
-            st.caption(view_description + " " + ranking_note)
 
             # Sort districts by their 2024 mean income so the chart reads
             # from lower to higher income, regardless of the filter selected.
@@ -998,10 +1000,6 @@ elif page == "Poverty Analysis":
                              ORANGE)
 
             st.markdown("### :material/search: Absolute Poverty vs Mean Household Income")
-            st.caption(
-                "Each point represents a district. The trendline shows "
-                "the overall linear pattern for the selected year."
-            )
 
             fig2 = px.scatter(
                 scatter_view,
@@ -1167,10 +1165,6 @@ elif page == "Population Analysis":
                              ORANGE)
 
         st.markdown("### :material/trending_up: Population Trends by District")
-        st.caption(
-            "Each line represents a district. Line colours represent states. "
-            "Use the state filter above to reduce the number of lines."
-        )
 
         fig3 = px.line(
             population_view,
