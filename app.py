@@ -284,10 +284,19 @@ st.markdown("""
         border-top: 4px solid #3984D6;
         border-radius: 14px;
         padding: 20px 22px;
-        min-height: 158px;
-        height: 100%;
+        height: 180px;
+        min-height: 180px;
         box-shadow: 0 4px 14px rgba(18, 59, 99, 0.06);
         box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dataset-names {
+        display: block;
+        font-size: 17px;
+        line-height: 1.4;
+        font-weight: 750;
     }
 
     .summary-label {
@@ -607,19 +616,13 @@ if page == "Home":
         '<div class="section-heading"><span class="material-symbols-rounded">home</span> Dashboard Overview</div>',
         unsafe_allow_html=True
     )
-    st.write(
-        "This dashboard presents socioeconomic and demographic "
-        "patterns across states and districts in Malaysia using "
-        "household income, household poverty and population datasets."
-    )
-
     # Study profile: datasets, geographical coverage and study period
     info1, info2, info3 = st.columns(3)
 
     with info1:
         summary_card(
             ":material/database: Dataset Names",
-            "Household Income<br>Household Poverty<br>Population",
+            "<span class=\"dataset-names\">Household Income<br>Household Poverty<br>Population</span>",
             "Three selected datasets",
             BLUE
         )
