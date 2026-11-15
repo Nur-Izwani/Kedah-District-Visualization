@@ -100,24 +100,65 @@ st.markdown("""
     }
 
     .hero {
-        background: linear-gradient(115deg, #123B63, #087E8B, #19A7A1);
-        padding: 30px 34px;
-        border-radius: 18px;
-        margin-bottom: 22px;
-        box-shadow: 0 8px 22px rgba(18, 59, 99, 0.13);
+        background: linear-gradient(115deg, #123B63 0%, #087E8B 55%, #19A7A1 100%);
+        padding: 42px 44px;
+        border-radius: 20px;
+        margin-bottom: 26px;
+        min-height: 178px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 10px 28px rgba(18, 59, 99, 0.16);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::after {
+        content: "";
+        position: absolute;
+        width: 230px;
+        height: 230px;
+        right: -65px;
+        top: -105px;
+        border: 1px solid rgba(255,255,255,0.16);
+        border-radius: 50%;
+        box-shadow: 0 0 0 24px rgba(255,255,255,0.035),
+                    0 0 0 50px rgba(255,255,255,0.025);
+        pointer-events: none;
     }
 
     .hero h1 {
         color: #FFFFFF;
-        font-size: 34px;
-        font-weight: 800;
+        font-size: clamp(30px, 3vw, 43px);
+        font-weight: 900;
+        letter-spacing: 1.2px;
+        line-height: 1.15;
         margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        position: relative;
+        z-index: 1;
     }
 
-    .hero p {
-        color: #E7F6FF;
-        font-size: 15px;
-        margin: 8px 0 0 0;
+    .hero h1 .material-symbols-rounded {
+        font-size: 42px;
+        font-weight: 400;
+    }
+
+    @media (max-width: 640px) {
+        .hero {
+            min-height: 140px;
+            padding: 28px 24px;
+        }
+        .hero h1 {
+            font-size: 27px;
+            letter-spacing: 0.5px;
+            gap: 10px;
+        }
+        .hero h1 .material-symbols-rounded {
+            font-size: 32px;
+        }
     }
 
     .section-heading {
@@ -518,12 +559,10 @@ def style_axes(fig, x_title, y_title, x_format=None, y_format=None):
 # ------------------------------------------------------------
 st.sidebar.markdown(
     """
-    <div style="padding:10px 2px 16px 2px;">
-        <div style="font-size:23px;font-weight:850;line-height:1.2;">
-            <span class="material-symbols-rounded">query_stats</span> MALAYSIA<br>DATA INSIGHTS
-        </div>
-        <div style="font-size:12px;color:#D8F0F5;margin-top:8px;">
-            Scientific Visualization Dashboard
+    <div style="padding:10px 2px 22px 2px;">
+        <div style="font-size:23px;font-weight:900;line-height:1.25;letter-spacing:0.4px;">
+            <span class="material-symbols-rounded">query_stats</span><br>
+            SCIENTIFIC<br>VISUALIZATION
         </div>
     </div>
     """,
@@ -553,9 +592,7 @@ st.sidebar.caption("JIE42403 | Scientific Visualization")
 st.markdown(
     """
     <div class="hero">
-        <h1><span class="material-symbols-rounded">query_stats</span> MALAYSIA DATA INSIGHTS</h1>
-        <p>Household Income, Poverty and Population Analysis</p>
-        <p>Scientific Visualization Project · Malaysia · 2020–2024</p>
+        <h1><span class="material-symbols-rounded">query_stats</span> SCIENTIFIC VISUALIZATION</h1>
     </div>
     """,
     unsafe_allow_html=True
@@ -1051,11 +1088,21 @@ elif page == "Poverty Analysis":
                 selector=dict(mode="markers")
             )
 
+            # Update chart title automatically based on the selected state.
+            area_title = (
+                "Malaysia" if selected_state == "All States"
+                else selected_state
+            )
+            fig2_title = (
+                f"<b>Relationship Between Absolute Poverty and Mean "
+                f"Household Income in {area_title} (2022 vs 2024)</b>"
+            )
+
             fig2.update_layout(
                 **plotly_layout,
                 height=680,
                 title=dict(
-                    text="<b>Relationship Between Absolute Poverty and Mean Household Income (2022 vs 2024)</b>",
+                    text=fig2_title,
                     x=0.5,
                     xanchor="center",
                     font=dict(size=18, color=NAVY)
@@ -1222,11 +1269,21 @@ elif page == "Population Analysis":
             opacity=0.78
         )
 
+        # Update chart title automatically based on the selected state.
+        area_title = (
+            "Malaysia" if selected_state == "All States"
+            else selected_state
+        )
+        fig3_title = (
+            f"<b>Population Trends by District in {area_title} "
+            f"(2020–2024)</b>"
+        )
+
         fig3.update_layout(
             **plotly_layout,
             height=780,
             title=dict(
-                text="<b>Population Trends by District in Malaysia (2020–2024)</b>",
+                text=fig3_title,
                 x=0.5,
                 xanchor="center",
                 font=dict(size=18, color=NAVY)
@@ -1327,9 +1384,8 @@ elif page == "Population Analysis":
 st.markdown(
     """
     <div class="footer">
-        <b style="color:#123B63;">MALAYSIA DATA INSIGHTS</b><br>
-        JIE42403 · Scientific Visualization<br>
-        Household Income, Poverty and Population Analysis · Malaysia
+        <b style="color:#123B63;">SCIENTIFIC VISUALIZATION</b><br>
+        JIE42403
     </div>
     """,
     unsafe_allow_html=True
