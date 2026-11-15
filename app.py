@@ -516,9 +516,9 @@ if page == "Home":
             """
             <div class="objective-card">
                 <h4><span class="material-symbols-rounded">payments</span> Objective 1 – Household Income</h4>
-                <p>To compare mean household income across districts
-                in Malaysia between 2022 and 2024.</p>
-                <br><b>Visualization:</b> Grouped Horizontal Bar Chart
+                <p>To identify and compare the 10 districts with the highest and
+                lowest mean household income in Malaysia in 2024.</p>
+                <br><b>Visualization:</b> Grouped Horizontal Bar Chart (Top 10 and Bottom 10)
             </div>
             """,
             unsafe_allow_html=True
@@ -602,8 +602,8 @@ elif page == "Household Income Analysis":
         """
         <div class="objective-card">
             <h4><span class="material-symbols-rounded">track_changes</span> Objective 1</h4>
-            <p>To compare mean household income across districts in
-            Malaysia between 2022 and 2024.</p>
+            <p>To identify and compare the 10 districts with the highest and
+            lowest mean household income in Malaysia in 2024.</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -612,154 +612,197 @@ elif page == "Household Income Analysis":
     if df_graph1.empty:
         st.warning("No income records are available for 2022 and 2024.")
     else:
-        # Optional state selector while retaining all districts
         states = sorted(df_graph1["state"].dropna().unique())
         selected_state = st.selectbox(
             ":material/map: Filter by State",
-            ["All States"] + states
+            ["All States"] + states,
+            key="income_state_filter"
         )
 
+        # Use 2024 to determine the ranking. The selected districts are then
+        # displayed for both 2022 and 2024 to retain the year comparison.
+        income_2024 = df_graph1[
+            df_graph1["year_label"] == "2024"
+        ].dropna(subset=["income_mean"]).copy()
+
         if selected_state == "All States":
-            income_view = df_graph1.copy()
+            top10_2024 = income_2024.nlargest(10, "income_mean")
+            bottom10_2024 = income_2024.nsmallest(10, "income_mean")
+
+            ranked_2024 = pd.concat(
+                [top10_2024, bottom10_2024],
+                ignore_index=True
+            ).drop_duplicates(subset=["state", "district"])
+
+            selected_keys = ranked_2024[["state", "district"]].drop_duplicates()
+            income_view = df_graph1.merge(
+                selected_keys,
+                on=["state", "district"],
+                how="inner"
+            )
+            view_description = "Top 10 highest and Top 10 lowest districts in Malaysia, ranked using 2024 mean income."
+            chart_title = "Top 10 Highest and Top 10 Lowest Mean Household Income by District in Malaysia"
+            ranking_note = "Ranking is based on 2024 mean household income. Both 2022 and 2024 values are shown for the selected districts."
         else:
             income_view = df_graph1[
                 df_graph1["state"] == selected_state
             ].copy()
+            view_description = f"All available districts in {selected_state}."
+            chart_title = f"Mean Household Income by District in {selected_state}"
+            ranking_note = f"All available districts in {selected_state} are displayed. The highest and lowest values are identified using 2024 data."
 
-        state_district_count = income_view[
-            ["state", "district"]
-        ].drop_duplicates().shape[0]
+        if income_view.empty:
+            st.warning("No district income records are available for this selection.")
+        else:
+            # Summary statistics are based on the 2024 values in the current view.
+            current_2024 = income_view[
+                income_view["year_label"] == "2024"
+            ].dropna(subset=["income_mean"]).copy()
 
-        highest_2024 = income_view[
-            income_view["year_label"] == "2024"
-        ].nlargest(1, "income_mean")
+            highest_2024 = current_2024.nlargest(1, "income_mean")
+            lowest_2024 = current_2024.nsmallest(1, "income_mean")
+            district_count = current_2024[["state", "district"]].drop_duplicates().shape[0]
 
-        lowest_2024 = income_view[
-            income_view["year_label"] == "2024"
-        ].nsmallest(1, "income_mean")
+            s1, s2, s3 = st.columns(3)
+            with s1:
+                summary_card(
+                    ":material/location_on: Districts Displayed",
+                    str(district_count),
+                    "20 ranked districts for All States; all districts for a selected state" if selected_state == "All States" else f"Districts in {selected_state}",
+                    BLUE
+                )
+            with s2:
+                if not highest_2024.empty:
+                    row = highest_2024.iloc[0]
+                    summary_card(
+                        ":material/emoji_events: Highest Income (2024)",
+                        f"RM {row['income_mean']:,.0f}",
+                        f"{row['district']}, {row['state']}",
+                        TEAL
+                    )
+            with s3:
+                if not lowest_2024.empty:
+                    row = lowest_2024.iloc[0]
+                    summary_card(
+                        ":material/flag: Lowest Income (2024)",
+                        f"RM {row['income_mean']:,.0f}",
+                        f"{row['district']}, {row['state']}",
+                        ORANGE
+                    )
 
-        mean_2024 = income_view[
-            income_view["year_label"] == "2024"
-        ]["income_mean"].mean()
+            st.markdown("### :material/query_stats: Mean Household Income by District")
+            st.caption(view_description + " " + ranking_note)
 
-        s1, s2, s3 = st.columns(3)
-        with s1:
-            summary_card(":material/location_on: Districts Displayed", str(state_district_count),
-                         "Selected geographic coverage", BLUE)
-        with s2:
-            if not highest_2024.empty:
-                row = highest_2024.iloc[0]
-                summary_card(":material/emoji_events: Highest Income (2024)",
-                             f"RM {row['income_mean']:,.0f}",
-                             f"{row['district']}, {row['state']}", TEAL)
-        with s3:
-            if not lowest_2024.empty:
-                row = lowest_2024.iloc[0]
-                summary_card(":material/push_pin: Lowest Income (2024)",
-                             f"RM {row['income_mean']:,.0f}",
-                             f"{row['district']}, {row['state']}", ORANGE)
-
-        st.markdown("### :material/query_stats: Mean Household Income by District")
-        st.caption(
-            "Grouped horizontal bars compare district mean household "
-            "income in 2022 and 2024. The year legend is displayed on the right."
-        )
-
-        order = (
-            income_view.groupby("district_label")["income_mean"]
-            .mean().sort_values(ascending=True).index.tolist()
-        )
-
-        fig1 = px.bar(
-            income_view,
-            x="income_mean",
-            y="district_label",
-            color="year_label",
-            orientation="h",
-            barmode="group",
-            text="income_mean",
-            category_orders={
-                "district_label": order,
-                "year_label": ["2022", "2024"]
-            },
-            color_discrete_map={
-                "2022": BLUE,
-                "2024": TEAL
-            },
-            labels={
-                "income_mean": "Mean Household Income (RM)",
-                "district_label": "District",
-                "year_label": "Year"
-            }
-        )
-
-        fig1.update_traces(
-            texttemplate="RM %{text:,.0f}",
-            textposition="outside",
-            textfont=dict(size=9, color="#26374A"),
-            cliponaxis=False
-        )
-
-        fig1.update_layout(
-            **plotly_layout,
-            height=max(650, len(order) * 35),
-            title=dict(
-                text="<b>Mean Household Income by District in Malaysia</b>",
-                x=0.5,
-                font=dict(size=19, color=NAVY)
-            ),
-            legend=dict(
-                title="<b>Year</b>",
-                orientation="v",
-                yanchor="middle",
-                y=0.5,
-                xanchor="left",
-                x=1.02,
-                bgcolor="white",
-                bordercolor="#D0D7DE",
-                borderwidth=1
-            ),
-            bargap=0.28,
-            margin=dict(l=175, r=160, t=100, b=85)
-        )
-        style_axes(
-            fig1,
-            "Mean Household Income (RM)",
-            "District",
-            x_format=",.0f"
-        )
-
-        st.plotly_chart(fig1, use_container_width=True)
-
-        st.markdown("### :material/description: Interpretation and Discussion")
-        inc22 = income_view[income_view["year_label"] == "2022"]["income_mean"].mean()
-        inc24 = income_view[income_view["year_label"] == "2024"]["income_mean"].mean()
-
-        if pd.notna(inc22) and pd.notna(inc24):
-            difference = inc24 - inc22
-            if difference > 0:
-                trend = "increased"
-            elif difference < 0:
-                trend = "decreased"
-            else:
-                trend = "remained unchanged"
-
-            st.write(
-                f"The average of the displayed district mean-income values "
-                f"{trend} from RM {inc22:,.0f} in 2022 to RM {inc24:,.0f} "
-                f"in 2024, a difference of RM {difference:,.0f}. "
-                "The bars also allow comparison of income levels between "
-                "individual districts and the two selected years."
+            # Sort districts by their 2024 mean income so the chart reads
+            # from lower to higher income, regardless of the filter selected.
+            district_order = (
+                current_2024.sort_values("income_mean", ascending=True)
+                .assign(district_label=lambda x: x["district"] + " (" + x["state"] + ")")["district_label"]
+                .tolist()
             )
 
-        with st.expander(":material/table_view: View income data"):
-            st.dataframe(
-                income_view[
-                    ["state", "district", "year_label", "income_mean"]
-                ].sort_values(["state", "district", "year_label"]),
-                use_container_width=True,
-                hide_index=True
+            # Keep a stable district label in case the dataframe is filtered.
+            income_view = income_view.copy()
+            income_view["district_label"] = (
+                income_view["district"].astype(str)
+                + " ("
+                + income_view["state"].astype(str)
+                + ")"
             )
+
+            fig1 = px.bar(
+                income_view,
+                x="income_mean",
+                y="district_label",
+                color="year_label",
+                orientation="h",
+                barmode="group",
+                text="income_mean",
+                category_orders={
+                    "district_label": district_order,
+                    "year_label": ["2022", "2024"]
+                },
+                color_discrete_map={
+                    "2022": BLUE,
+                    "2024": TEAL
+                },
+                labels={
+                    "income_mean": "Mean Household Income (RM)",
+                    "district_label": "District",
+                    "year_label": "Year"
+                }
+            )
+
+            fig1.update_traces(
+                texttemplate="RM %{text:,.0f}",
+                textposition="outside",
+                textfont=dict(size=10, color="#26374A"),
+                cliponaxis=False
+            )
+
+            fig1.update_layout(
+                **plotly_layout,
+                height=max(620, len(district_order) * 42),
+                title=dict(
+                    text=f"<b>{chart_title}</b>",
+                    x=0.5,
+                    font=dict(size=18, color=NAVY)
+                ),
+                legend=dict(
+                    title="<b>Year</b>",
+                    orientation="v",
+                    yanchor="middle",
+                    y=0.5,
+                    xanchor="left",
+                    x=1.02,
+                    bgcolor="white",
+                    bordercolor="#D0D7DE",
+                    borderwidth=1
+                ),
+                bargap=0.30,
+                margin=dict(l=185, r=160, t=95, b=85)
+            )
+            style_axes(
+                fig1,
+                "Mean Household Income (RM)",
+                "District",
+                x_format=",.0f"
+            )
+
+            st.plotly_chart(fig1, use_container_width=True)
+
+            st.markdown("### :material/description: Interpretation and Discussion")
+            inc22 = income_view.loc[
+                income_view["year_label"] == "2022", "income_mean"
+            ].mean()
+            inc24 = income_view.loc[
+                income_view["year_label"] == "2024", "income_mean"
+            ].mean()
+
+            if pd.notna(inc22) and pd.notna(inc24):
+                difference = inc24 - inc22
+                if difference > 0:
+                    trend = "increased"
+                elif difference < 0:
+                    trend = "decreased"
+                else:
+                    trend = "remained unchanged"
+
+                st.write(
+                    f"For the districts displayed, the average mean household income "
+                    f"{trend} from RM {inc22:,.0f} in 2022 to RM {inc24:,.0f} "
+                    f"in 2024, a difference of RM {difference:,.0f}. "
+                    f"{ranking_note}"
+                )
+
+            with st.expander(":material/table_view: View income data"):
+                st.dataframe(
+                    income_view[
+                        ["state", "district", "year_label", "income_mean"]
+                    ].sort_values(["state", "district", "year_label"]),
+                    use_container_width=True,
+                    hide_index=True
+                )
 
 # ============================================================
 # PAGE 3: VISUALIZATION 2 - POVERTY AND INCOME
