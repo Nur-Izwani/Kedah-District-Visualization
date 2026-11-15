@@ -173,6 +173,70 @@ st.markdown("""
         line-height: 1.6;
     }
 
+    /* Compact, polished objective panel for visualization pages */
+    .objective-card.objective-compact {
+        height: auto;
+        min-height: 0;
+        padding: 17px 22px 19px 22px;
+        margin: 8px 0 18px 0;
+        border-left: 5px solid #16A6A0;
+        border-radius: 14px;
+        background: linear-gradient(115deg, #FFFFFF 0%, #F8FCFF 100%);
+        box-shadow: 0 5px 16px rgba(18, 59, 99, 0.07);
+        gap: 10px;
+    }
+
+    .objective-card.objective-compact .objective-card-heading {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #123B63;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .objective-card.objective-compact .objective-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        background: #E5F7F5;
+        color: #0D9488;
+        font-size: 20px;
+    }
+
+    .objective-card.objective-compact .objective-period {
+        margin-left: auto;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #EAF2FB;
+        color: #315A82;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+
+    .objective-card.objective-compact p {
+        color: #344B63;
+        font-size: 15px;
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    @media (max-width: 640px) {
+        .objective-card.objective-compact {
+            padding: 15px 16px;
+        }
+        .objective-card.objective-compact .objective-period {
+            font-size: 10px;
+            padding: 4px 7px;
+        }
+    }
+
     .summary-card {
         background: #FFFFFF;
         border: 1px solid #DCE6F2;
@@ -545,7 +609,7 @@ if page == "Home":
             """
             <div class="objective-card">
                 <h4>Objective 1</h4>
-                <p>Mengenal pasti dan membandingkan daerah yang mempunyai pendapatan purata isi rumah tertinggi dan terendah di Malaysia bagi tahun 2022 dan 2024.</p>
+                <p>To identify and compare the districts with the highest and lowest mean household income in Malaysia in 2022 and 2024.</p>
             </div>
             """,
             unsafe_allow_html=True
@@ -623,9 +687,9 @@ elif page == "Household Income Analysis":
 
     st.markdown(
         """
-        <div class="objective-card">
-            <h4><span class="material-symbols-rounded">track_changes</span> Objective 1</h4>
-            <p>Mengenal pasti dan membandingkan daerah yang mempunyai pendapatan purata isi rumah tertinggi dan terendah di Malaysia bagi tahun 2022 dan 2024.</p>
+        <div class="objective-card objective-compact">
+            <div class="objective-card-heading"><span class="objective-icon material-symbols-rounded">track_changes</span><span>OBJECTIVE 1</span><span class="objective-period">2022 – 2024</span></div>
+            <p>To identify and compare the districts with the highest and lowest mean household income in Malaysia in 2022 and 2024.</p>
         </div>
         """,
         unsafe_allow_html=True
