@@ -54,6 +54,10 @@ st.markdown("""
     }
 
     /* Navigation options styled as rounded cards */
+    [data-testid="stSidebar"] [data-testid="stRadio"] > label {
+        display: none !important;
+    }
+
     [data-testid="stSidebar"] [data-testid="stRadio"] > div {
         gap: 9px;
     }
@@ -439,9 +443,8 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("### :material/analytics: Select Analysis")
 
 page = st.sidebar.radio(
-    "Select analysis",
+    "Navigation",
     [
-        "Home",
         "Household Income Analysis",
         "Poverty Analysis",
         "Population Analysis"
@@ -746,6 +749,7 @@ elif page == "Household Income Analysis":
                 title=dict(
                     text=f"<b>{chart_title}</b>",
                     x=0.5,
+                    xanchor="center",
                     font=dict(size=18, color=NAVY)
                 ),
                 legend=dict(
@@ -929,6 +933,7 @@ elif page == "Poverty Analysis":
                 title=dict(
                     text=f"<b>Relationship Between Absolute Poverty and Mean Household Income ({selected_year})</b>",
                     x=0.5,
+                    xanchor="center",
                     font=dict(size=18, color=NAVY)
                 ),
                 showlegend=False,
@@ -1094,6 +1099,7 @@ elif page == "Population Analysis":
             title=dict(
                 text="<b>Population Trends by District in Malaysia (2020–2024)</b>",
                 x=0.5,
+                xanchor="center",
                 font=dict(size=18, color=NAVY)
             ),
             legend=dict(
