@@ -402,25 +402,6 @@ st.markdown("""
         font-size: 12px;
     }
 
-    /* FINAL OVERRIDES: identical heading style and refined dashboard spacing */
-    .dashboard-section-title {
-        display: flex !important;
-        align-items: center !important;
-        gap: 11px !important;
-        color: #123B63 !important;
-        font-family: inherit !important;
-        font-size: 25px !important;
-        font-weight: 800 !important;
-        line-height: 1.3 !important;
-        letter-spacing: 0 !important;
-        margin: 8px 0 22px 0 !important;
-        padding: 0 !important;
-    }
-    .dashboard-section-title .material-symbols-rounded {
-        color: #123B63 !important;
-        font-size: 27px !important;
-        line-height: 1 !important;
-    }
     .summary-card {
         width: 100% !important;
         height: 190px !important;
@@ -741,10 +722,7 @@ st.markdown(
 # ============================================================
 if page == "Home":
 
-    st.markdown(
-        '<div class="dashboard-section-title"><span class="material-symbols-rounded">home</span><span>Dashboard Overview</span></div>',
-        unsafe_allow_html=True
-    )
+    st.markdown("### :material/home: Dashboard Overview")
     # Study profile: datasets, geographical coverage and study period
     info1, info2, info3 = st.columns(3, gap="large")
 
@@ -772,10 +750,7 @@ if page == "Home":
             PURPLE
         )
 
-    st.markdown(
-        '<div class="dashboard-section-title"><span class="material-symbols-rounded">track_changes</span><span>Research Objectives</span></div>',
-        unsafe_allow_html=True
-    )
+    st.markdown("### :material/track_changes: Research Objectives")
 
     o1, o2, o3 = st.columns(3)
 
