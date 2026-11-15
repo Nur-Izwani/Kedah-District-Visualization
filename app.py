@@ -131,16 +131,18 @@ div[data-testid="stMetric"] {
 # 3. LOAD THREE DATASETS
 # ============================================================
 
+
 @st.cache_data
 def load_data():
 
-    income = pd.read_csv("hh_income_district.csv")
+    income = pd.read_csv("hh_income_district (1).csv")
 
     poverty = pd.read_csv("hh_poverty_district.csv")
 
-    population = pd.read_csv("population_district.csv")
+    population = pd.read_csv("population_district (1).csv")
 
     return income, poverty, population
+
 
 
 try:
