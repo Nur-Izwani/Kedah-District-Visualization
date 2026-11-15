@@ -445,6 +445,7 @@ st.sidebar.markdown("### :material/analytics: Select Analysis")
 page = st.sidebar.radio(
     "Navigation",
     [
+        "Home",
         "Household Income Analysis",
         "Poverty Analysis",
         "Population Analysis"
@@ -1191,7 +1192,6 @@ elif page == "Population Analysis":
                 use_container_width=True,
                 hide_index=True
             )
-
 # ------------------------------------------------------------
 # 11. FOOTER
 # ------------------------------------------------------------
@@ -1199,6 +1199,7 @@ st.markdown(
     """
     <div class="footer">
         <b style="color:#123B63;">MALAYSIA DATA INSIGHTS</b><br>
+        JIE42403 · Scientific Visualization<br>
         Household Income, Poverty and Population Analysis · Malaysia
     </div>
     """,
