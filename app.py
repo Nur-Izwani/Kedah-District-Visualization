@@ -249,6 +249,11 @@ except Exception as error:
     st.info("Check that all three CSV files are in the same folder as app.py.")
     st.stop()
 
+# Standardise column names before validating them.
+df_income.columns = df_income.columns.str.strip().str.lower()
+df_poverty.columns = df_poverty.columns.str.strip().str.lower()
+df_pop.columns = df_pop.columns.str.strip().str.lower()
+
 # ------------------------------------------------------------
 # 4. DATA PREPROCESSING
 # ------------------------------------------------------------
@@ -333,15 +338,26 @@ poverty_scatter = df_poverty[
     df_poverty["year"].isin([2022, 2024])
 ][["state", "district", "year", "poverty_absolute"]].copy()
 
+# Keep one value for each district and year before merging.
+income_scatter = (
+    income_scatter.dropna(subset=["income_mean"])
+    .groupby(["state", "district", "year"], as_index=False)["income_mean"]
+    .mean()
+)
+poverty_scatter = (
+    poverty_scatter.dropna(subset=["poverty_absolute"])
+    .groupby(["state", "district", "year"], as_index=False)["poverty_absolute"]
+    .mean()
+)
+
 income_scatter["year"] = income_scatter["year"].astype(str)
 poverty_scatter["year"] = poverty_scatter["year"].astype(str)
 
 df_graph2 = pd.merge(
-    income_scatter.dropna(subset=["income_mean"]),
-    poverty_scatter.dropna(subset=["poverty_absolute"]),
+    income_scatter,
+    poverty_scatter,
     on=["state", "district", "year"],
-    how="inner",
-    validate="one_to_one"
+    how="inner"
 )
 
 df_graph2["district_label"] = (
@@ -872,33 +888,30 @@ elif page == "Poverty Analysis":
         ["poverty_absolute", "income_mean"]
     ].corr().iloc[0, 1]
 
-    # Summary values calculated from the filtered dataset.
-    poverty_min = poverty_view["poverty_absolute"].min()
-    poverty_max = poverty_view["poverty_absolute"].max()
-
+    # Three summary boxes requested for the poverty analysis.
     s1, s2, s3 = st.columns(3)
 
     with s1:
         summary_card(
-            ":material/trending_down: Pearson Correlation",
-            f"{correlation:.3f}" if pd.notna(correlation) else "N/A",
-            "Relationship between poverty and income",
+            ":material/trending_down: Relationship",
+            "Negative relationship",
+            "Higher poverty is generally associated with lower household income",
             BLUE
         )
 
     with s2:
         summary_card(
-            ":material/bar_chart: Lowest Poverty Rate",
-            f"{poverty_min:.2f}%",
-            "Lowest observed absolute poverty rate",
+            ":material/bar_chart: Poverty Rate 0%–15%",
+            "RM4,000–RM8,000",
+            "Typical mean household income range",
             TEAL
         )
 
     with s3:
         summary_card(
-            ":material/warning: Highest Poverty Rate",
-            f"{poverty_max:.2f}%",
-            "Highest observed absolute poverty rate",
+            ":material/warning: Poverty Rate Above 30%",
+            "RM3,000–RM5,000",
+            "Typical mean household income range",
             ORANGE
         )
 
@@ -909,8 +922,6 @@ elif page == "Poverty Analysis":
         x="poverty_absolute",
         y="income_mean",
         color="year_label",
-        trendline="ols",
-        trendline_scope="trace",
         hover_name="district_label",
         hover_data={
             "state": True,
@@ -935,6 +946,32 @@ elif page == "Poverty Analysis":
         ),
         selector=dict(mode="markers")
     )
+
+    # Add one linear trendline per year without requiring statsmodels.
+    for year_value, line_color in [("2022", BLUE), ("2024", TEAL)]:
+        year_data = poverty_view[poverty_view["year_label"] == year_value].dropna(
+            subset=["poverty_absolute", "income_mean"]
+        )
+        if len(year_data) >= 2 and year_data["poverty_absolute"].nunique() >= 2:
+            slope, intercept = np.polyfit(
+                year_data["poverty_absolute"],
+                year_data["income_mean"],
+                1
+            )
+            x_line = np.linspace(
+                year_data["poverty_absolute"].min(),
+                year_data["poverty_absolute"].max(),
+                100
+            )
+            y_line = slope * x_line + intercept
+            fig2.add_scatter(
+                x=x_line,
+                y=y_line,
+                mode="lines",
+                name=f"{year_value} Trendline",
+                line=dict(color=line_color, width=2, dash="dash"),
+                hoverinfo="skip"
+            )
 
     area_title = (
         "Malaysia" if selected_state == "All States"
@@ -1003,8 +1040,8 @@ elif page == "Poverty Analysis":
         correlation_description,
         "The scatter plot shows the distribution of district records for both 2022 and 2024.",
         "Districts with higher absolute poverty rates generally tend to have lower mean household income.",
-        "The downward trendline supports the negative relationship between poverty and income when the correlation is negative.",
-        "This pattern suggests that districts with higher poverty levels tend to experience lower household income. However, correlation does not prove causation."
+        "The trendline helps show the direction of the relationship between poverty and income.",
+        "The pattern indicates an association between the two variables, but correlation does not prove causation."
     ])
 
     with st.expander(":material/table_view: View poverty and income data"):
@@ -1231,11 +1268,6 @@ elif page == "Population Analysis":
         "These differences indicate that population distribution is not equal across districts in Malaysia."
     ]
 
-    if selected_state == "All States":
-        interpretation_points.append(
-            "Petaling, Selangor recorded the highest population throughout the study period, while Tanjung Manis, Sarawak recorded the lowest, according to the study findings."
-        )
-
     interpretation_box(interpretation_points)
 
     with st.expander(":material/table_view: View population summary by year"):
@@ -1244,6 +1276,7 @@ elif page == "Population Analysis":
             use_container_width=True,
             hide_index=True
         )
+
     with st.expander(":material/table_view: View population data by district"):
         st.dataframe(
             population_view.sort_values(["state", "district", "year"]),
