@@ -168,6 +168,59 @@ st.markdown("""
         margin: 8px 0 12px 0;
     }
 
+    .home-overview-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #123B63;
+        font-size: 22px;
+        font-weight: 750;
+        line-height: 1.35;
+        margin: 4px 0 26px 0;
+        padding-bottom: 2px;
+    }
+
+    .home-overview-heading .material-symbols-rounded {
+        font-size: 25px;
+        color: #123B63;
+    }
+
+    /* Consistent spacing and typography in the three dashboard cards */
+    .summary-card {
+        padding: 22px 24px;
+        height: 190px;
+        min-height: 190px;
+    }
+
+    .summary-label {
+        color: #123B63;
+        font-size: 14px;
+        font-weight: 750;
+        margin-bottom: 13px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .summary-value {
+        color: #123B63;
+        font-size: 18px;
+        font-weight: 750;
+        line-height: 1.55;
+        margin-top: 8px;
+    }
+
+    .summary-detail {
+        margin-top: 12px;
+        line-height: 1.5;
+    }
+
+    .dataset-names {
+        font-size: 16px;
+        line-height: 1.65;
+        font-weight: 700;
+    }
+
     .objective-card {
         background: #FFFFFF;
         border: 1px solid #DCE6F2;
@@ -613,7 +666,7 @@ st.markdown(
 if page == "Home":
 
     st.markdown(
-        '<div class="section-heading"><span class="material-symbols-rounded">home</span> Dashboard Overview</div>',
+        '<div class="home-overview-heading"><span class="material-symbols-rounded">home</span> Dashboard Overview</div>',
         unsafe_allow_html=True
     )
     # Study profile: datasets, geographical coverage and study period
