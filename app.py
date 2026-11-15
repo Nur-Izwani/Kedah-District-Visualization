@@ -401,6 +401,82 @@ st.markdown("""
         padding: 22px 8px 12px 8px;
         font-size: 12px;
     }
+
+    /* FINAL OVERRIDES: identical heading style and refined dashboard spacing */
+    .dashboard-section-title {
+        display: flex !important;
+        align-items: center !important;
+        gap: 11px !important;
+        color: #123B63 !important;
+        font-family: inherit !important;
+        font-size: 25px !important;
+        font-weight: 800 !important;
+        line-height: 1.3 !important;
+        letter-spacing: 0 !important;
+        margin: 8px 0 22px 0 !important;
+        padding: 0 !important;
+    }
+    .dashboard-section-title .material-symbols-rounded {
+        color: #123B63 !important;
+        font-size: 27px !important;
+        line-height: 1 !important;
+    }
+    .summary-card {
+        width: 100% !important;
+        height: 190px !important;
+        min-height: 190px !important;
+        padding: 22px 24px !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        box-sizing: border-box !important;
+        border-radius: 14px !important;
+    }
+    .summary-label {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        color: #64748B !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        line-height: 1.4 !important;
+        margin: 0 0 15px 0 !important;
+    }
+    .summary-label .material-symbols-rounded {
+        font-size: 17px !important;
+    }
+    .summary-value {
+        color: #123B63 !important;
+        font-size: 18px !important;
+        font-weight: 750 !important;
+        line-height: 1.55 !important;
+        margin: 0 !important;
+    }
+    .summary-value .dataset-names {
+        display: block !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        line-height: 1.65 !important;
+    }
+    .summary-detail {
+        color: #64748B !important;
+        font-size: 12px !important;
+        line-height: 1.45 !important;
+        margin-top: auto !important;
+        padding-top: 10px !important;
+    }
+    @media (max-width: 900px) {
+        .dashboard-section-title {
+            font-size: 23px !important;
+            margin-bottom: 18px !important;
+        }
+        .summary-card {
+            height: auto !important;
+            min-height: 175px !important;
+        }
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -666,11 +742,11 @@ st.markdown(
 if page == "Home":
 
     st.markdown(
-        '<div class="home-overview-heading"><span class="material-symbols-rounded">home</span> Dashboard Overview</div>',
+        '<div class="dashboard-section-title"><span class="material-symbols-rounded">home</span><span>Dashboard Overview</span></div>',
         unsafe_allow_html=True
     )
     # Study profile: datasets, geographical coverage and study period
-    info1, info2, info3 = st.columns(3)
+    info1, info2, info3 = st.columns(3, gap="large")
 
     with info1:
         summary_card(
@@ -696,7 +772,10 @@ if page == "Home":
             PURPLE
         )
 
-    st.markdown("### :material/track_changes: Research Objectives")
+    st.markdown(
+        '<div class="dashboard-section-title"><span class="material-symbols-rounded">track_changes</span><span>Research Objectives</span></div>',
+        unsafe_allow_html=True
+    )
 
     o1, o2, o3 = st.columns(3)
 
