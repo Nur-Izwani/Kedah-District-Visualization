@@ -447,7 +447,7 @@ st.markdown("""
 <h1>KEDAH DATA INSIGHTS</h1>
 
 <p>
-Household Income, Population and District Analysis
+Household Income, Population, Poverty Analysis
 </p>
 
 <p>
@@ -580,8 +580,7 @@ elif "Visualization 1" in page:
 
     st.markdown(
         '<div class="section-title">'
-        ':material/account_balance_wallet: '
-        'OBJECTIVE 1: HOUSEHOLD INCOME'
+        'OBJECTIVE 1:'
         '</div>',
         unsafe_allow_html=True
     )
@@ -776,8 +775,7 @@ elif "Visualization 2" in page:
 
     st.markdown(
         '<div class="section-title">'
-        ':material/scatter_plot: '
-        'OBJECTIVE 2: POPULATION VS INCOME'
+        'OBJECTIVE 2:'
         '</div>',
         unsafe_allow_html=True
     )
@@ -998,8 +996,7 @@ elif "Visualization 3" in page:
 
     st.markdown(
         '<div class="section-title">'
-        ':material/show_chart: '
-        'OBJECTIVE 3: POPULATION TRENDS'
+        'OBJECTIVE 3:'
         '</div>',
         unsafe_allow_html=True
     )
